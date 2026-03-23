@@ -11,8 +11,12 @@ export async function POST(request: Request) {
     const PAY_ITEM_ID = process.env.INTERSWITCH_PAY_ITEM_ID || '101007';
     const MAC_KEY = process.env.INTERSWITCH_MAC_KEY || 'D3D1D05AFE42AD50818167EAC73C109168A0F108F32645C8B59E897FA930DA44F9230910DAC9E20641823799A107A02068F7BC0F4CC41D2952E249552255710F';
     
-    // In production, this would be your live domain
-    const SITE_REDIRECT_URL = process.env.INTERSWITCH_REDIRECT_URL || 'http://localhost:3000/success';
+    // Dynamically grab the Vercel live domain or fallback to localhost
+    const host = request.headers.get('host') || 'localhost:3000';
+    const protocol = host.includes('localhost') ? 'http' : 'https';
+    
+    // In production, this perfectly loops the payment gateway back to the demo site
+    const SITE_REDIRECT_URL = process.env.INTERSWITCH_REDIRECT_URL || `${protocol}://${host}/success`;
     
     // Standard QA Interswitch Endpoint
     const Interswitch_URL = 'https://qa.interswitchng.com/collections/w/pay';
