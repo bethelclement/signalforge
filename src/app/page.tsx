@@ -59,8 +59,26 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Sustainable Branding Band */}
+      <section className="border-t border-b border-[var(--color-border)] py-10 bg-white/50 backdrop-blur-sm">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 opacity-80 mix-blend-multiply">
+           <p className="text-sm font-semibold tracking-widest uppercase text-gray-500">Proudly Built For</p>
+           <div className="flex items-center gap-12">
+              {/* Enyata branding text (since we don't have SVG) */}
+              <div className="text-2xl font-black tracking-tighter text-gray-800">
+                Enyata
+              </div>
+              <div className="h-8 w-px bg-gray-300"></div>
+              {/* Interswitch branding text */}
+              <div className="text-2xl font-black tracking-tighter text-blue-800 italic flex items-center gap-1">
+                Interswitch<span className="text-red-600 text-3xl leading-none">.</span>
+              </div>
+           </div>
+        </div>
+      </section>
+
       {/* How It Works Section */}
-      <section id="how-it-works" className="pt-16 pb-8 border-t border-[var(--color-border)] scroll-mt-20">
+      <section id="how-it-works" className="pt-12 pb-8 scroll-mt-20">
          <div className="text-center mb-12">
             <h2 className="text-3xl font-bold tracking-tight mb-4">A straightforward ML pipeline</h2>
             <p className="text-[var(--color-text-muted)] max-w-xl mx-auto">Built securely over Interswitch architecture and backed by robust Python Machine Learning engines.</p>
