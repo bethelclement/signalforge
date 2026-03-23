@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { UploadCloud, CheckCircle2, ChevronRight, Calculator, Loader2, ShieldCheck } from "lucide-react";
+import { useState } from 'react';
+import { UploadCloud, CheckCircle2, Calculator, ChevronRight, Loader2, ShieldCheck, MapPin, AlignLeft } from 'lucide-react';
 
-export default function ReportWastePage() {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+export default function ReportPage() {
+  const [step, setStep] = useState<number>(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  
+  // Form State
+  const [address, setAddress] = useState('');
+  const [details, setDetails] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  
   const [analysisResult, setAnalysisResult] = useState<{
     category: string;
     volume: string;
@@ -16,46 +22,51 @@ export default function ReportWastePage() {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentConfig, setPaymentConfig] = useState<any>(null);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      
-      reader.onloadend = async () => {
-        setIsAnalyzing(true);
-        try {
-          const res = await fetch('/api/analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ imageBase64: reader.result })
-          });
-          
-          if (!res.ok) throw new Error("Analysis failed");
-          
-          const data = await res.json();
-          setAnalysisResult({
-            category: data.category || "Unidentified Waste",
-            volume: data.volume || "Unknown",
-            estimatedCost: data.estimatedCost || 2500,
-            description: data.description || "Machine learning engine processed the image."
-          });
-          
-        } catch (error) {
-          console.error("AI scan error:", error);
-          setAnalysisResult({
-            category: "Mixed Recyclables (Fallback)",
-            volume: "Medium (approx 2 bags)",
-            estimatedCost: 2500,
-            description: "Network timeout. Offline estimation applied."
-          });
-        } finally {
-          setIsAnalyzing(false);
-          setStep(2);
-        }
-      };
-      
-      reader.readAsDataURL(file);
+      setSelectedFile(e.target.files[0]);
     }
+  };
+
+  const handleAnalyzeUpload = () => {
+    if (!selectedFile || !address) return; // Prevent empty submission
+    
+    const reader = new FileReader();
+    
+    reader.onloadend = async () => {
+      setIsAnalyzing(true);
+      try {
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageBase64: reader.result })
+        });
+        
+        if (!res.ok) throw new Error("Analysis failed");
+        
+        const data = await res.json();
+        setAnalysisResult({
+          category: data.category || "Unidentified Waste",
+          volume: data.volume || "Unknown",
+          estimatedCost: data.estimatedCost || 2500,
+          description: data.description || "Machine learning engine processed the image."
+        });
+        
+      } catch (error) {
+        console.error("AI scan error:", error);
+        setAnalysisResult({
+          category: "Mixed Recyclables (Fallback)",
+          volume: "Medium (approx 2 bags)",
+          estimatedCost: 2500,
+          description: "Network timeout. Offline estimation applied."
+        });
+      } finally {
+        setIsAnalyzing(false);
+        setStep(2);
+      }
+    };
+    
+    reader.readAsDataURL(selectedFile);
   };
 
   const handleProceedToPayment = () => {
@@ -92,14 +103,14 @@ export default function ReportWastePage() {
     <div className="max-w-3xl mx-auto py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight mb-2">Report & Request Pickup</h1>
-        <p className="text-[var(--color-text-muted)]">Upload an image of the waste for instant AI analysis and pricing.</p>
+        <p className="text-[var(--color-text-muted)]">Provide location details and upload an image for immediate AI verification.</p>
       </div>
 
       {/* Progress Indicator */}
       <div className="flex items-center gap-2 mb-10 w-full text-sm font-medium text-[var(--color-text-muted)]">
         <div className={`flex items-center gap-2 ${step >= 1 ? 'text-[var(--color-primary)]' : ''}`}>
           <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${step >= 1 ? 'border-[var(--color-primary)] bg-green-50' : 'border-gray-300'}`}>1</div>
-          <span>Upload</span>
+          <span>Report Info</span>
         </div>
         <div className="h-px bg-gray-300 flex-1 mx-2"></div>
         <div className={`flex items-center gap-2 ${step >= 2 ? 'text-[var(--color-primary)]' : ''}`}>
@@ -109,36 +120,93 @@ export default function ReportWastePage() {
         <div className="h-px bg-gray-300 flex-1 mx-2"></div>
         <div className={`flex items-center gap-2 ${step >= 3 ? 'text-[var(--color-primary)]' : ''}`}>
           <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${step >= 3 ? 'border-[var(--color-primary)] bg-green-50' : 'border-gray-300'}`}>3</div>
-          <span>Payment</span>
+          <span>Checkout</span>
         </div>
       </div>
 
-      {/* Step 1: Upload */}
+      {/* Step 1: Upload & Info */}
       {step === 1 && (
-        <div className="card border-dashed border-2 p-12 flex flex-col items-center justify-center text-center hover:bg-gray-50 transition-colors cursor-pointer relative min-h-[300px]">
-          <input 
-            type="file" 
-            accept="image/*" 
-            onChange={handleFileUpload} 
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          />
-          {isAnalyzing ? (
-            <div className="flex flex-col items-center gap-4 text-[var(--color-primary)]">
-              <Loader2 className="w-12 h-12 animate-spin" />
-              <p className="font-semibold text-lg">Querying Python ML Engine...</p>
-              <p className="text-xs text-[var(--color-text-muted)] animate-pulse">Running computer vision models</p>
-            </div>
-          ) : (
-            <>
-              <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-6 shadow-sm">
-                <UploadCloud size={32} />
-              </div>
-              <h3 className="text-xl font-bold mb-2 text-[var(--color-text-main)]">Upload Waste Photo</h3>
-              <p className="text-[var(--color-text-muted)] max-w-sm">
-                Tap to select a photo from your device. Our AI will automatically classify the waste type.
-              </p>
-            </>
-          )}
+        <div className="animate-in fade-in duration-500 space-y-6">
+          <div className="card p-8 bg-white border border-[var(--color-border)] shadow-sm">
+             <h2 className="text-xl font-bold mb-6 text-[var(--color-text-main)] border-b pb-4">Incident Details</h2>
+             
+             <div className="space-y-6">
+               <div>
+                  <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center gap-2">
+                    <MapPin size={16} className="text-[var(--color-primary)]"/> Exact Location (Address)
+                  </label>
+                  <input 
+                    type="text" 
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    required 
+                    className="input-field w-full bg-gray-50 focus:bg-white transition-colors" 
+                    placeholder="e.g. 12 Obafemi Awolowo Way, Ikeja, Lagos"
+                  />
+               </div>
+
+               <div>
+                  <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center gap-2">
+                    <AlignLeft size={16} className="text-[var(--color-primary)]"/> Additional Landmarks / Notes (Optional)
+                  </label>
+                  <textarea 
+                    value={details}
+                    onChange={(e) => setDetails(e.target.value)}
+                    rows={3}
+                    className="input-field w-full bg-gray-50 focus:bg-white transition-colors py-3" 
+                    placeholder="e.g. Near the main junction, heavy industrial waste blocking the drain."
+                  />
+               </div>
+
+               <div>
+                  <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2">Upload Waste Photo</label>
+                  <div className={`border-dashed border-2 rounded-xl p-8 flex flex-col items-center justify-center text-center transition-colors relative ${selectedFile ? 'bg-green-50 border-green-300' : 'hover:bg-gray-50 border-gray-300 bg-white'}`}>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleFileChange} 
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    {isAnalyzing ? (
+                      <div className="flex flex-col items-center gap-4 text-[var(--color-primary)] py-4">
+                        <Loader2 className="w-10 h-10 animate-spin" />
+                        <p className="font-semibold">Extracting telemetry & analyzing vision...</p>
+                      </div>
+                    ) : selectedFile ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <CheckCircle2 className="w-12 h-12 text-green-500 mb-2" />
+                        <h3 className="font-bold text-green-800">{selectedFile.name}</h3>
+                        <p className="text-xs text-green-600">Image attached securely. Click to change.</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-4 shadow-sm">
+                          <UploadCloud size={28} />
+                        </div>
+                        <h3 className="font-semibold text-[var(--color-text-main)] mb-1">Tap to capture or upload</h3>
+                        <p className="text-xs text-[var(--color-text-muted)] max-w-xs">
+                          High-resolution photos grant better ML classification and tighter pricing.
+                        </p>
+                      </>
+                    )}
+                  </div>
+               </div>
+             </div>
+
+             <div className="mt-8 pt-6 border-t border-[var(--color-border)] flex justify-end">
+               <button 
+                  onClick={handleAnalyzeUpload}
+                  disabled={!address || !selectedFile || isAnalyzing}
+                  className="btn-primary flex items-center gap-2 px-8 py-3 shadow-md disabled:bg-emerald-300 disabled:cursor-not-allowed transition-all"
+               >
+                 {isAnalyzing ? (
+                   <><Loader2 className="w-5 h-5 animate-spin" /> Querying ML Engine</>
+                 ) : (
+                   <>Analyze Incident <ChevronRight size={18} /></>
+                 )}
+               </button>
+             </div>
+          </div>
         </div>
       )}
 
@@ -149,18 +217,23 @@ export default function ReportWastePage() {
             <div className="flex items-start justify-between mb-6">
               <div>
                 <h3 className="text-xl font-bold flex items-center gap-2 mb-1">
-                  <CheckCircle2 className="text-[var(--color-primary)] w-6 h-6" /> Analysis Complete
+                  <CheckCircle2 className="text-[var(--color-primary)] w-6 h-6" /> Incident Verification Complete
                 </h3>
-                <p className="text-[var(--color-text-muted)] text-sm">Review the estimated parameters before requesting pickup.</p>
+                <p className="text-[var(--color-text-muted)] text-sm">Review the verified location and extracted estimated parameters.</p>
               </div>
-              <button onClick={() => setStep(1)} className="text-sm font-medium text-[var(--color-primary)] hover:underline">
-                Re-upload
+              <button onClick={() => setStep(1)} className="text-sm font-medium text-[var(--color-primary)] hover:underline border border-transparent">
+                Edit Report
               </button>
             </div>
 
             <div className="bg-gray-50 rounded-lg p-6 grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 mb-6 border border-[var(--color-border)]">
+              <div className="md:col-span-2 pb-4 border-b border-gray-200">
+                <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1 flex items-center gap-1"><MapPin size={12}/> Target Location</p>
+                <p className="font-medium text-[var(--color-text-main)]">{address}</p>
+                {details && <p className="text-sm text-gray-500 mt-1 italic">Note: {details}</p>}
+              </div>
               <div>
-                <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Category</p>
+                <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">Waste Category</p>
                 <p className="font-medium text-lg text-[var(--color-text-main)]">{analysisResult.category}</p>
               </div>
               <div>
@@ -168,8 +241,8 @@ export default function ReportWastePage() {
                 <p className="font-medium text-lg text-[var(--color-text-main)]">{analysisResult.volume}</p>
               </div>
               <div className="md:col-span-2">
-                <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">AI Notes</p>
-                <p className="text-sm text-[var(--color-text-main)]">{analysisResult.description}</p>
+                <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">ML Extraction Notes</p>
+                <p className="text-sm text-[var(--color-text-main)] leading-relaxed">{analysisResult.description}</p>
               </div>
             </div>
 
