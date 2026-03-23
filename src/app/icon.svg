@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Dark Emerald Background representing deep sustainability -->
+  <rect width="256" height="256" rx="64" fill="#064E3B" />
+  
+  <!-- Outer leaf symbolizing natural integration -->
+  <path d="M128 40 C60 40 30 110 30 170 C60 190 128 200 128 200 C128 200 196 190 226 170 C226 110 196 40 128 40 Z" fill="#10B981" />
+  
+  <!-- Inner tech-leaf symbolizing the AI/fintech layer -->
+  <path d="M128 80 C90 80 60 130 60 160 C90 175 128 180 128 180 C128 180 166 175 196 160 C196 130 166 80 128 80 Z" fill="#34D399" />
+  
+  <!-- Tech node symbolizing ML/Analytics -->
+  <circle cx="128" cy="180" r="16" fill="#ECFDF5" />
+  <circle cx="128" cy="180" r="6" fill="#047857" />
+  
+  <!-- Connecting lines -->
+  <path d="M128 164 L128 100" stroke="#047857" stroke-width="4" stroke-linecap="round" />
+  <path d="M128 140 L100 120" stroke="#047857" stroke-width="4" stroke-linecap="round" />
+  <path d="M128 140 L156 120" stroke="#047857" stroke-width="4" stroke-linecap="round" />
+</svg>
