@@ -13,9 +13,11 @@ export default function ReportWastePage() {
     description: string;
   } | null>(null);
 
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentConfig, setPaymentConfig] = useState<any>(null);
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      // Simulate AI Analysis
       setIsAnalyzing(true);
       setTimeout(() => {
         setAnalysisResult({
@@ -34,6 +36,32 @@ export default function ReportWastePage() {
     setStep(3);
   };
 
+  const initInterswitchPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsProcessingPayment(true);
+
+    try {
+      const res = await fetch('/api/pay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: (analysisResult?.estimatedCost || 2500) * 100 })
+      });
+      
+      const config = await res.json();
+      setPaymentConfig(config);
+      
+      // We need to wait for state to update, then submit the hidden form
+      setTimeout(() => {
+        const form = document.getElementById('interswitch-checkout-form') as HTMLFormElement;
+        if (form) form.submit();
+      }, 500);
+
+    } catch (error) {
+      console.error('Payment initialization failed', error);
+      setIsProcessingPayment(false);
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto py-8">
       <div className="mb-8">
@@ -44,24 +72,24 @@ export default function ReportWastePage() {
       {/* Progress Indicator */}
       <div className="flex items-center gap-2 mb-10 w-full text-sm font-medium text-[var(--color-text-muted)]">
         <div className={`flex items-center gap-2 ${step >= 1 ? 'text-[var(--color-primary)]' : ''}`}>
-          <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${step >= 1 ? 'border-[var(--color-primary)] bg-green-50' : 'border-gray-300'}`}>1</div>
+          <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${step >= 1 ? 'border-[var(--color-primary)] bg-green-50' : 'border-gray-300'}`}>1</div>
           <span>Upload</span>
         </div>
         <div className="h-px bg-gray-300 flex-1 mx-2"></div>
         <div className={`flex items-center gap-2 ${step >= 2 ? 'text-[var(--color-primary)]' : ''}`}>
-          <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${step >= 2 ? 'border-[var(--color-primary)] bg-green-50' : 'border-gray-300'}`}>2</div>
+          <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${step >= 2 ? 'border-[var(--color-primary)] bg-green-50' : 'border-gray-300'}`}>2</div>
           <span>Analysis</span>
         </div>
         <div className="h-px bg-gray-300 flex-1 mx-2"></div>
         <div className={`flex items-center gap-2 ${step >= 3 ? 'text-[var(--color-primary)]' : ''}`}>
-          <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${step >= 3 ? 'border-[var(--color-primary)] bg-green-50' : 'border-gray-300'}`}>3</div>
+          <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${step >= 3 ? 'border-[var(--color-primary)] bg-green-50' : 'border-gray-300'}`}>3</div>
           <span>Payment</span>
         </div>
       </div>
 
       {/* Step 1: Upload */}
       {step === 1 && (
-        <div className="card border-dashed border-2 p-12 flex flex-col items-center justify-center text-center hover:bg-gray-50 transition-colors cursor-pointer relative">
+        <div className="card border-dashed border-2 p-12 flex flex-col items-center justify-center text-center hover:bg-gray-50 transition-colors cursor-pointer relative min-h-[300px]">
           <input 
             type="file" 
             accept="image/*" 
@@ -75,7 +103,7 @@ export default function ReportWastePage() {
             </div>
           ) : (
             <>
-              <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-6">
+              <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-6 shadow-sm">
                 <UploadCloud size={32} />
               </div>
               <h3 className="text-xl font-bold mb-2 text-[var(--color-text-main)]">Upload Waste Photo</h3>
@@ -118,7 +146,7 @@ export default function ReportWastePage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-6">
+            <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-6 mt-6">
               <div className="flex items-center gap-3">
                 <div className="bg-green-100 text-[var(--color-primary)] p-3 rounded-lg">
                   <Calculator size={24} />
@@ -129,7 +157,7 @@ export default function ReportWastePage() {
                 </div>
               </div>
               
-              <button onClick={handleProceedToPayment} className="btn-primary flex items-center gap-2">
+              <button onClick={handleProceedToPayment} className="btn-primary flex items-center gap-2 px-6 py-3">
                 Proceed to Pay <ChevronRight size={18} />
               </button>
             </div>
@@ -140,53 +168,70 @@ export default function ReportWastePage() {
       {/* Step 3: Payment (Interswitch) */}
       {step === 3 && analysisResult && (
         <div className="animate-in fade-in duration-500 space-y-6">
-          <div className="card p-8 bg-white border-t-4 border-t-red-600 shadow-lg">
+          <div className="card p-8 bg-white border-t-4 border-t-[#D22B2B] shadow-md relative overflow-hidden">
+            
             <div className="flex items-center gap-4 mb-8">
-               <div className="w-12 h-12 bg-red-50 text-red-600 rounded flex items-center justify-center font-bold text-xl italic tracking-tighter">
-                 Interswitch
+               <div className="w-14 h-14 bg-red-50 text-[#D22B2B] rounded-lg flex items-center justify-center font-bold text-xl tracking-tighter shadow-sm border border-red-100">
+                 ISW
                </div>
                <div>
-                  <h3 className="text-xl font-bold">Secure Checkout</h3>
-                  <p className="text-[var(--color-text-muted)] text-sm">Complete your payment via Interswitch Webpay</p>
+                  <h3 className="text-xl font-bold text-[#D22B2B]">Interswitch Webpay</h3>
+                  <p className="text-[var(--color-text-muted)] text-sm">Secure digital checkout portal</p>
                </div>
             </div>
             
-            <div className="space-y-4 mb-8">
-              <div className="flex justify-between py-3 border-b border-gray-100">
-                <span className="text-[var(--color-text-muted)]">Service Reference</span>
-                <span className="font-mono text-sm font-medium">WW-2026-00109A</span>
+            <div className="space-y-4 mb-8 bg-gray-50 p-6 rounded-lg border border-[var(--color-border)]">
+              <div className="flex justify-between items-center pb-4 border-b border-[var(--color-border)]">
+                <span className="text-[var(--color-text-muted)] font-medium">Service Reference</span>
+                <span className="font-mono text-sm font-semibold bg-white px-2 py-1 rounded border border-[var(--color-border)]">WW-2026-00109A</span>
               </div>
-              <div className="flex justify-between py-3 border-b border-gray-100">
-                <span className="text-[var(--color-text-muted)]">Total Amount</span>
-                <span className="font-bold text-lg">₦{analysisResult.estimatedCost.toLocaleString()}</span>
+              <div className="flex justify-between items-center pt-2">
+                <span className="text-[var(--color-text-muted)] font-medium">Total Amount Due</span>
+                <span className="font-bold text-2xl tracking-tight">₦{analysisResult.estimatedCost.toLocaleString()}</span>
               </div>
             </div>
 
-            {/* This is simply an MVP mock to show Interswitch UI/integration direction */}
-            <form action="/api/pay" method="GET" className="space-y-6">
-              <input type="hidden" name="amount" value={analysisResult.estimatedCost * 100} />
-              
+            <form onSubmit={initInterswitchPayment} className="space-y-6">
               <div className="space-y-4">
                  <div>
-                    <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">Email Address</label>
-                    <input type="email" name="email" required className="input-field max-w-sm bg-gray-50 focus:bg-white" placeholder="your@email.com" defaultValue="user@signalforge.io"/>
+                    <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2">Email Address</label>
+                    <input type="email" name="email" required className="input-field max-w-sm bg-white" placeholder="your@email.com" defaultValue="user@signalforge.io"/>
+                    <p className="text-xs text-[var(--color-text-muted)] mt-2">Payment receipt will be sent to this email.</p>
                  </div>
               </div>
 
-              <div className="pt-4 flex items-center justify-between">
-                <button type="button" onClick={() => setStep(2)} className="text-sm font-medium text-[var(--color-text-muted)] hover:text-gray-900">
+              <div className="pt-6 mt-6 border-t border-[var(--color-border)] flex items-center justify-between">
+                <button type="button" onClick={() => setStep(2)} className="text-sm font-medium text-[var(--color-text-muted)] border border-transparent hover:border-gray-300 px-4 py-2 rounded transition-all" disabled={isProcessingPayment}>
                   Cancel
                 </button>
-                <button type="submit" className="w-full max-w-xs bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded shadow-md transition-colors flex items-center justify-center gap-2">
-                  Pay Now
+                <button type="submit" disabled={isProcessingPayment} className="w-full max-w-xs bg-[#D22B2B] hover:bg-red-800 disabled:bg-red-400 text-white font-semibold py-3 px-6 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
+                  {isProcessingPayment ? (
+                    <><Loader2 className="w-5 h-5 animate-spin" /> Identifying node...</>
+                  ) : (
+                    'Pay via Interswitch'
+                  )}
                 </button>
               </div>
             </form>
+
+            {/* Hidden Interswitch Checkout Form */}
+            {paymentConfig && (
+              <form id="interswitch-checkout-form" action={paymentConfig.action_url} method="POST" style={{ display: 'none' }}>
+                <input type="hidden" name="product_id" value={paymentConfig.product_id} />
+                <input type="hidden" name="pay_item_id" value={paymentConfig.pay_item_id} />
+                <input type="hidden" name="amount" value={paymentConfig.amount} />
+                <input type="hidden" name="currency" value={paymentConfig.currency} />
+                <input type="hidden" name="site_redirect_url" value={paymentConfig.site_redirect_url} />
+                <input type="hidden" name="txn_ref" value={paymentConfig.txn_ref} />
+                <input type="hidden" name="hash" value={paymentConfig.hash} />
+              </form>
+            )}
+            
           </div>
           
-          <p className="text-center text-xs text-[var(--color-text-muted)] mt-6 flex items-center justify-center gap-1">
+          <p className="text-center text-xs text-[var(--color-text-muted)] mt-6 flex items-center justify-center gap-1.5 opacity-80">
             <ShieldCheck size={14} className="text-green-600" />
-            Payments are secured by Interswitch infrastructure
+            End-to-end encryption. Processing powered by Interswitch infrastructure.
           </p>
         </div>
       )}
