@@ -206,7 +206,8 @@ export default function ReportPage() {
                   <div className={`border-dashed border-2 rounded-xl p-8 flex flex-col items-center justify-center text-center transition-colors relative ${selectedFile ? 'bg-green-50 border-green-300' : 'hover:bg-gray-50 border-gray-300 bg-white'}`}>
                     <input 
                       type="file" 
-                      accept="image/*" 
+                      accept="image/*"
+                      capture="environment"
                       onChange={handleFileChange} 
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
@@ -231,9 +232,9 @@ export default function ReportPage() {
                         <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-4 shadow-sm">
                           <UploadCloud size={28} />
                         </div>
-                        <h3 className="font-semibold text-[var(--color-text-main)] mb-1">Tap to capture or upload</h3>
+                        <h3 className="font-semibold text-[var(--color-text-main)] mb-1">Tap to snap a photo</h3>
                         <p className="text-xs text-[var(--color-text-muted)] max-w-xs">
-                          High-resolution photos grant better ML classification and tighter pricing.
+                          Clear photos help our AI accurately calculate your pickup fee and assign the right PSP.
                         </p>
                       </>
                     )}
