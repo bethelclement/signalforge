@@ -8,6 +8,8 @@ export default function ReportPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   
   // Form State
+  const [reporterName, setReporterName] = useState('');
+  const [reporterNumber, setReporterNumber] = useState('');
   const [address, setAddress] = useState('');
   const [details, setDetails] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -29,7 +31,7 @@ export default function ReportPage() {
   };
 
   const handleAnalyzeUpload = () => {
-    if (!selectedFile || !address) return; // Prevent empty submission
+    if (!selectedFile || !address || !reporterName || !reporterNumber) return; // Prevent empty submission
     
     const reader = new FileReader();
     
@@ -131,6 +133,35 @@ export default function ReportPage() {
              <h2 className="text-xl font-bold mb-6 text-[var(--color-text-main)] border-b pb-4">Incident Details</h2>
              
              <div className="space-y-6">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div>
+                    <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center gap-2">
+                      Reporter Full Name
+                    </label>
+                    <input 
+                      type="text" 
+                      value={reporterName}
+                      onChange={(e) => setReporterName(e.target.value)}
+                      required 
+                      className="input-field w-full bg-gray-50 focus:bg-white transition-colors" 
+                      placeholder="e.g. Jane Doe"
+                    />
+                 </div>
+                 <div>
+                    <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center gap-2">
+                      Reporter Phone Number
+                    </label>
+                    <input 
+                      type="tel" 
+                      value={reporterNumber}
+                      onChange={(e) => setReporterNumber(e.target.value)}
+                      required 
+                      className="input-field w-full bg-gray-50 focus:bg-white transition-colors" 
+                      placeholder="e.g. 08012345678"
+                    />
+                 </div>
+               </div>
+
                <div>
                   <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center gap-2">
                     <MapPin size={16} className="text-[var(--color-primary)]"/> Exact Location (Address)
