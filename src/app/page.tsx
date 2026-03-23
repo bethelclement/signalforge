@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BarChart3, Camera, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight, BarChart3, Camera, ShieldCheck, Zap, MapPin } from "lucide-react";
 
 export default function Home() {
   return (
@@ -13,17 +13,17 @@ export default function Home() {
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-[var(--color-text-main)] leading-tight">
             Smarter waste reporting 
             <br className="hidden md:block"/> 
-            <span className="text-[var(--color-primary)]">powered by AI.</span>
+            <span className="text-[var(--color-primary)]">for a cleaner Lagos.</span>
           </h1>
           <p className="text-[var(--color-text-muted)] text-lg max-w-2xl leading-relaxed">
-            WasteWise AI is the enterprise-grade solution for municipal and private waste management. Report issues, get AI verification, and cleanly process collection payments in seconds.
+            WasteWise AI is an enterprise-grade ML platform built to tackle illegal dumping across Nigeria. We connect citizens to PSP operators and LAWMA through instant AI verification and secure Interswitch payments.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <Link href="/report" className="btn-primary flex items-center justify-center gap-2 py-3 px-8 text-base shadow-sm">
               Start Reporting <ArrowRight className="w-4 h-4" />
             </Link>
-            <a href="#how-it-works" className="btn-secondary flex items-center justify-center py-3 px-8 text-base shadow-sm">
-              Learn more
+            <a href="#how-it-works" className="btn-secondary flex items-center justify-center py-3 px-8 text-base shadow-sm scroll-smooth">
+              How it works
             </a>
           </div>
         </div>
@@ -33,13 +33,13 @@ export default function Home() {
           <div className="absolute top-0 right-0 w-64 h-64 bg-green-50 rounded-full blur-3xl opacity-50 -mr-16 -mt-16 pointer-events-none"></div>
           
           <div className="relative z-10 w-full max-w-sm flex flex-col gap-4">
-            <div className="card p-4 flex items-center gap-4">
+            <div className="card p-4 flex items-center gap-4 border-l-4 border-l-blue-500">
                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
                  <Camera size={20} />
                </div>
                <div>
                   <h4 className="font-semibold text-sm">AI Scan complete</h4>
-                  <p className="text-xs text-[var(--color-text-muted)]">Category: Recyclable Plastics</p>
+                  <p className="text-xs text-[var(--color-text-muted)]">Category: Commercial Plastics - Oshodi</p>
                </div>
             </div>
             
@@ -50,48 +50,69 @@ export default function Home() {
                </div>
                <div>
                   <h4 className="font-semibold text-sm">Payment Verified</h4>
-                  <p className="text-xs text-[var(--color-text-muted)]">Interswitch Webpay Processed</p>
+                  <p className="text-xs text-[var(--color-text-muted)]">Interswitch Core Processed</p>
                </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features grid */}
-      <section id="features" className="pt-12 border-t border-[var(--color-border)]">
+      {/* How It Works Section */}
+      <section id="how-it-works" className="pt-16 pb-8 border-t border-[var(--color-border)] scroll-mt-20">
          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight mb-4">Fintech-grade reliability</h2>
-            <p className="text-[var(--color-text-muted)] max-w-xl mx-auto">Our infrastructure is built to scale, ensuring your reports are accurately classified and payments are securely processed.</p>
+            <h2 className="text-3xl font-bold tracking-tight mb-4">A straightforward ML pipeline</h2>
+            <p className="text-[var(--color-text-muted)] max-w-xl mx-auto">Built securely over Interswitch architecture and backed by robust Python Machine Learning engines.</p>
          </div>
 
+         <div className="grid md:grid-cols-3 gap-8 relative before:absolute before:top-12 before:left-[10%] before:w-[80%] before:h-0.5 before:bg-gray-100 before:hidden md:before:block before:-z-10">
+            <div className="flex flex-col items-center text-center gap-4 bg-white p-6 z-10">
+               <div className="w-12 h-12 rounded-full border-4 border-white bg-blue-100 flex items-center justify-center text-blue-600 font-bold shadow-sm">1</div>
+               <h3 className="font-semibold text-lg">Snap & Upload</h3>
+               <p className="text-sm text-[var(--color-text-muted)]">Report waste hotspots anywhere in Lagos. Our system geo-tags the exact coordinates.</p>
+            </div>
+            <div className="flex flex-col items-center text-center gap-4 bg-white p-6 z-10">
+               <div className="w-12 h-12 rounded-full border-4 border-white bg-green-100 flex items-center justify-center text-green-600 font-bold shadow-sm">2</div>
+               <h3 className="font-semibold text-lg">Python AI Engine</h3>
+               <p className="text-sm text-[var(--color-text-muted)]">Our custom ML models analyze the composition and calculate the exact clearance fee.</p>
+            </div>
+            <div className="flex flex-col items-center text-center gap-4 bg-white p-6 z-10">
+               <div className="w-12 h-12 rounded-full border-4 border-white bg-red-100 flex items-center justify-center text-[#D22B2B] font-bold shadow-sm">3</div>
+               <h3 className="font-semibold text-lg">Interswitch Checkout</h3>
+               <p className="text-sm text-[var(--color-text-muted)]">Securely pay the PSP operator instantly through the integrated Interswitch Webpay APIs.</p>
+            </div>
+         </div>
+      </section>
+
+      {/* Features grid */}
+      <section id="features" className="pt-12 border-t border-[var(--color-border)]">
          <div className="grid md:grid-cols-3 gap-6">
-            <div className="card p-6 flex flex-col items-start gap-4 hover:-translate-y-1 transition-transform cursor-default">
+            <div className="card p-6 flex flex-col items-start gap-4 cursor-default">
                <div className="w-12 h-12 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
-                  <Zap size={24} />
+                  <MapPin size={24} />
                </div>
-               <h3 className="font-semibold text-lg text-[var(--color-text-main)]">Instant Reporting</h3>
+               <h3 className="font-semibold text-lg text-[var(--color-text-main)]">Lagos Mapping</h3>
                <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Snap a photo and our AI instantly identifies the type of waste, estimating volume and assigning right handlers.
+                  Pinpointing dumping hotspots in areas like Surulere, Ikeja, and Lekki for faster LAWMA response.
                </p>
             </div>
 
-            <div className="card p-6 flex flex-col items-start gap-4 hover:-translate-y-1 transition-transform cursor-default border-[var(--color-primary)]">
+            <div className="card p-6 flex flex-col items-start gap-4 cursor-default border-[var(--color-primary)]">
                <div className="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center text-[var(--color-primary)]">
                   <ShieldCheck size={24} />
                </div>
-               <h3 className="font-semibold text-lg text-[var(--color-text-main)]">Secure Payments</h3>
+               <h3 className="font-semibold text-lg text-[var(--color-text-main)]">True API Integrations</h3>
                <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Powered by Interswitch. Request specialized pickups and pay seamlessly directly from the dashboard.
+                  Deeply integrated with the real Interswitch QA Webpay environment using SHA-512 MAC hashing.
                </p>
             </div>
 
-            <div className="card p-6 flex flex-col items-start gap-4 hover:-translate-y-1 transition-transform cursor-default">
+            <div className="card p-6 flex flex-col items-start gap-4 cursor-default">
                <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                   <BarChart3 size={24} />
                </div>
-               <h3 className="font-semibold text-lg text-[var(--color-text-main)]">Data Intelligence</h3>
+               <h3 className="font-semibold text-lg text-[var(--color-text-main)]">ML Verification</h3>
                <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
-                  Agencies access a command center with real-time mapping of waste hotspots and collection efficiency.
+                  Python-based AI analysis automatically detects hazardous vs recyclable waste to protect operators.
                </p>
             </div>
          </div>

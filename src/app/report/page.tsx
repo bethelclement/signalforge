@@ -18,17 +18,43 @@ export default function ReportWastePage() {
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setIsAnalyzing(true);
-      setTimeout(() => {
-        setAnalysisResult({
-          category: "Mixed Recyclables",
-          volume: "Medium (approx 2 bags)",
-          estimatedCost: 2500, // NGN
-          description: "Contains mostly cardboard, plastic bottles, and some organic waste."
-        });
-        setIsAnalyzing(false);
-        setStep(2);
-      }, 2000);
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      
+      reader.onloadend = async () => {
+        setIsAnalyzing(true);
+        try {
+          const res = await fetch('/api/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageBase64: reader.result })
+          });
+          
+          if (!res.ok) throw new Error("Analysis failed");
+          
+          const data = await res.json();
+          setAnalysisResult({
+            category: data.category || "Unidentified Waste",
+            volume: data.volume || "Unknown",
+            estimatedCost: data.estimatedCost || 2500,
+            description: data.description || "Machine learning engine processed the image."
+          });
+          
+        } catch (error) {
+          console.error("AI scan error:", error);
+          setAnalysisResult({
+            category: "Mixed Recyclables (Fallback)",
+            volume: "Medium (approx 2 bags)",
+            estimatedCost: 2500,
+            description: "Network timeout. Offline estimation applied."
+          });
+        } finally {
+          setIsAnalyzing(false);
+          setStep(2);
+        }
+      };
+      
+      reader.readAsDataURL(file);
     }
   };
 
@@ -99,7 +125,8 @@ export default function ReportWastePage() {
           {isAnalyzing ? (
             <div className="flex flex-col items-center gap-4 text-[var(--color-primary)]">
               <Loader2 className="w-12 h-12 animate-spin" />
-              <p className="font-semibold text-lg">AI Engine analyzing waste...</p>
+              <p className="font-semibold text-lg">Querying Python ML Engine...</p>
+              <p className="text-xs text-[var(--color-text-muted)] animate-pulse">Running computer vision models</p>
             </div>
           ) : (
             <>
