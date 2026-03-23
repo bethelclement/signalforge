@@ -15,8 +15,8 @@ export async function POST(request: Request) {
     const host = request.headers.get('host') || 'localhost:3000';
     const protocol = host.includes('localhost') ? 'http' : 'https';
     
-    // In production, this perfectly loops the payment gateway back to the demo site
-    const SITE_REDIRECT_URL = process.env.INTERSWITCH_REDIRECT_URL || `${protocol}://${host}/success`;
+    // In production, this perfectly loops the payment gateway back to our API callback handler
+    const SITE_REDIRECT_URL = process.env.INTERSWITCH_REDIRECT_URL || `${protocol}://${host}/api/payment-callback`;
     
     // Standard QA Interswitch Endpoint
     const Interswitch_URL = 'https://qa.interswitchng.com/collections/w/pay';
