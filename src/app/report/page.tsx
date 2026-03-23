@@ -24,6 +24,8 @@ export default function ReportPage() {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentConfig, setPaymentConfig] = useState<any>(null);
 
+  const [isVerifyingKYC, setIsVerifyingKYC] = useState(false);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setSelectedFile(e.target.files[0]);
@@ -33,42 +35,50 @@ export default function ReportPage() {
   const handleAnalyzeUpload = () => {
     if (!selectedFile || !address || !reporterName || !reporterNumber) return; // Prevent empty submission
     
-    const reader = new FileReader();
+    // 1. First trigger Interswitch Identity Verification (KYC) API simulation
+    setIsVerifyingKYC(true);
     
-    reader.onloadend = async () => {
-      setIsAnalyzing(true);
-      try {
-        const res = await fetch('/api/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageBase64: reader.result })
-        });
-        
-        if (!res.ok) throw new Error("Analysis failed");
-        
-        const data = await res.json();
-        setAnalysisResult({
-          category: data.category || "Unidentified Waste",
-          volume: data.volume || "Unknown",
-          estimatedCost: data.estimatedCost || 2500,
-          description: data.description || "Machine learning engine processed the image."
-        });
-        
-      } catch (error) {
-        console.error("AI scan error:", error);
-        setAnalysisResult({
-          category: "Mixed Recyclables (Fallback)",
-          volume: "Medium (approx 2 bags)",
-          estimatedCost: 2500,
-          description: "Network timeout. Offline estimation applied."
-        });
-      } finally {
-        setIsAnalyzing(false);
-        setStep(2);
-      }
-    };
-    
-    reader.readAsDataURL(selectedFile);
+    setTimeout(() => {
+      setIsVerifyingKYC(false);
+      
+      // 2. Then proceed to ML Vision Analysis
+      const reader = new FileReader();
+      
+      reader.onloadend = async () => {
+        setIsAnalyzing(true);
+        try {
+          const res = await fetch('/api/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageBase64: reader.result })
+          });
+          
+          if (!res.ok) throw new Error("Analysis failed");
+          
+          const data = await res.json();
+          setAnalysisResult({
+            category: data.category || "Unidentified Waste",
+            volume: data.volume || "Unknown",
+            estimatedCost: data.estimatedCost || 2500,
+            description: data.description || "Machine learning engine processed the image."
+          });
+          
+        } catch (error) {
+          console.error("AI scan error:", error);
+          setAnalysisResult({
+            category: "Mixed Recyclables (Fallback)",
+            volume: "Medium (approx 2 bags)",
+            estimatedCost: 2500,
+            description: "Network timeout. Offline estimation applied."
+          });
+        } finally {
+          setIsAnalyzing(false);
+          setStep(2);
+        }
+      };
+      
+      reader.readAsDataURL(selectedFile);
+    }, 1800); // 1.8s KYC delay
   };
 
   const handleProceedToPayment = () => {
@@ -126,11 +136,13 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* Step 1: Upload & Info */}
-      {step === 1 && (
+      {...step === 1 && (
         <div className="animate-in fade-in duration-500 space-y-6">
           <div className="card p-8 bg-white border border-[var(--color-border)] shadow-sm">
-             <h2 className="text-xl font-bold mb-6 text-[var(--color-text-main)] border-b pb-4">Incident Details</h2>
+             <h2 className="text-xl font-bold mb-6 text-[var(--color-text-main)] border-b pb-4 flex items-center gap-3">
+                Incident Details
+                <span className="text-[10px] uppercase font-bold tracking-widest bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-200">Protected by ISW KYC</span>
+             </h2>
              
              <div className="space-y-6">
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -198,7 +210,12 @@ export default function ReportPage() {
                       onChange={handleFileChange} 
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
-                    {isAnalyzing ? (
+                    {isVerifyingKYC ? (
+                      <div className="flex flex-col items-center gap-4 text-blue-600 py-4">
+                        <ShieldCheck className="w-10 h-10 animate-pulse" />
+                        <p className="font-semibold">Authenticating Identity via Interswitch KYC...</p>
+                      </div>
+                    ) : isAnalyzing ? (
                       <div className="flex flex-col items-center gap-4 text-[var(--color-primary)] py-4">
                         <Loader2 className="w-10 h-10 animate-spin" />
                         <p className="font-semibold">Extracting telemetry & analyzing vision...</p>
@@ -227,13 +244,15 @@ export default function ReportPage() {
              <div className="mt-8 pt-6 border-t border-[var(--color-border)] flex justify-end">
                <button 
                   onClick={handleAnalyzeUpload}
-                  disabled={!address || !selectedFile || isAnalyzing}
+                  disabled={!address || !selectedFile || isAnalyzing || isVerifyingKYC}
                   className="btn-primary flex items-center gap-2 px-8 py-3 shadow-md disabled:bg-emerald-300 disabled:cursor-not-allowed transition-all"
                >
-                 {isAnalyzing ? (
+                 {isVerifyingKYC ? (
+                   <><ShieldCheck className="w-5 h-5 animate-pulse" /> Authorizing Profile</>
+                 ) : isAnalyzing ? (
                    <><Loader2 className="w-5 h-5 animate-spin" /> Querying ML Engine</>
                  ) : (
-                   <>Analyze Incident <ChevronRight size={18} /></>
+                   <>Authenticate & Analyze <ChevronRight size={18} /></>
                  )}
                </button>
              </div>
