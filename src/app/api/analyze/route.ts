@@ -7,6 +7,9 @@ export async function POST(request: Request) {
     const { imageBase64 } = body;
 
     const apiKey = process.env.GEMINI_API_KEY;
+    
+    // Strip out the data URL prefix to get raw base64
+    const base64Data = imageBase64 ? imageBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : "";
 
     if (!apiKey) {
       // Sophisticated pseudo-deterministic fallback mimicking ML inference
@@ -50,8 +53,7 @@ export async function POST(request: Request) {
       }
     `;
 
-    // Strip out the data URL prefix to get raw base64
-    const base64Data = imageBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
+    // base64Data already declared above
 
     const imageParts = [
       {
