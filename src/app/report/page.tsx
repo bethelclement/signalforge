@@ -136,7 +136,7 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {...step === 1 && (
+      {step === 1 && (
         <div className="animate-in fade-in duration-500 space-y-6">
           <div className="card p-8 bg-white border border-[var(--color-border)] shadow-sm">
              <h2 className="text-xl font-bold mb-6 text-[var(--color-text-main)] border-b pb-4 flex items-center gap-3">
