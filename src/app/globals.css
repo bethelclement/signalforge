@@ -25,6 +25,10 @@
   .btn-secondary {
     @apply bg-white text-[var(--color-text-main)] border border-[var(--color-border)] px-6 py-2 rounded-md font-medium hover:bg-gray-50 transition-colors duration-200 shadow-sm;
   }
+  .bg-grid-pattern {
+    background-image: linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
   .card {
     @apply bg-white rounded-xl border border-[var(--color-border)] shadow-sm;
   }

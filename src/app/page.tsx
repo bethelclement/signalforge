@@ -3,7 +3,9 @@ import { ArrowRight, BarChart3, Camera, ShieldCheck, Zap, MapPin } from "lucide-
 
 export default function Home() {
   return (
-    <div className="flex flex-col gap-16 pb-16">
+    <div className="flex flex-col gap-16 pb-16 relative w-full">
+      <div className="absolute inset-0 bg-grid-pattern -z-10 h-[600px] w-full [mask-image:linear-gradient(to_bottom,white,transparent)] pointer-events-none"></div>
+      
       {/* Hero Section */}
       <section className="pt-12 text-center md:text-left flex flex-col md:flex-row items-center gap-12">
         <div className="flex-1 space-y-6">
