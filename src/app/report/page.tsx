@@ -112,7 +112,7 @@ export default function ReportPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto py-8">
+    <div className="max-w-3xl w-full mx-auto py-6 px-4 sm:py-8 sm:px-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight mb-2">Report & Request Pickup</h1>
         <p className="text-[var(--color-text-muted)]">Provide location details and upload an image for immediate AI verification.</p>
@@ -138,17 +138,17 @@ export default function ReportPage() {
 
       {step === 1 && (
         <div className="animate-in fade-in duration-500 space-y-6">
-          <div className="card p-8 bg-white border border-[var(--color-border)] shadow-sm">
-             <h2 className="text-xl font-bold mb-6 text-[var(--color-text-main)] border-b pb-4 flex items-center gap-3">
+          <div className="card p-5 sm:p-8 bg-white border border-[var(--color-border)] shadow-sm">
+             <h2 className="text-xl font-bold mb-6 text-[var(--color-text-main)] border-b pb-4 flex flex-col sm:flex-row sm:items-center gap-3">
                 Incident Details
-                <span className="text-[10px] uppercase font-bold tracking-widest bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-200">Protected by ISW KYC</span>
+                <span className="text-[10px] uppercase font-bold tracking-widest bg-blue-50 text-blue-700 w-fit px-2 py-1 rounded border border-blue-200">Protected by ISW KYC</span>
              </h2>
              
              <div className="space-y-6">
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <div>
                     <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center gap-2">
-                      Reporter Full Name
+                      Reporter's Full Name
                     </label>
                     <input 
                       type="text" 
@@ -156,12 +156,12 @@ export default function ReportPage() {
                       onChange={(e) => setReporterName(e.target.value)}
                       required 
                       className="input-field w-full bg-gray-50 focus:bg-white transition-colors" 
-                      placeholder="e.g. Jane Doe"
+                      placeholder="e.g. Yakubu Olamide"
                     />
                  </div>
                  <div>
                     <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center gap-2">
-                      Reporter Phone Number
+                      Reporter's Phone Number
                     </label>
                     <input 
                       type="tel" 
@@ -264,8 +264,8 @@ export default function ReportPage() {
       {/* Step 2: Review Analysis */}
       {step === 2 && analysisResult && (
         <div className="animate-in slide-in-from-bottom-4 duration-500 ease-out space-y-6">
-          <div className="card p-8">
-            <div className="flex items-start justify-between mb-6">
+          <div className="card p-5 sm:p-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
               <div>
                 <h3 className="text-xl font-bold flex items-center gap-2 mb-1">
                   <CheckCircle2 className="text-[var(--color-primary)] w-6 h-6" /> Incident Verification Complete
@@ -319,9 +319,9 @@ export default function ReportPage() {
       {/* Step 3: Payment (Interswitch) */}
       {step === 3 && analysisResult && (
         <div className="animate-in fade-in duration-500 space-y-6">
-          <div className="card p-8 bg-white border-t-4 border-t-[#D22B2B] shadow-md relative overflow-hidden">
+          <div className="card p-5 sm:p-8 bg-white border-t-4 border-t-[#D22B2B] shadow-md relative overflow-hidden">
             
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8">
                <div className="w-14 h-14 bg-red-50 text-[#D22B2B] rounded-lg flex items-center justify-center font-bold text-xl tracking-tighter shadow-sm border border-red-100">
                  ISW
                </div>
