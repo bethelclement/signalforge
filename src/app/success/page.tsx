@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { CheckCircle, MapPin, Truck } from "lucide-react";
 
-export default function SuccessPage({
+export default async function SuccessPage({
   searchParams,
 }: {
-  searchParams: { txnref?: string; resp?: string; desc?: string };
+  searchParams: Promise<{ txnref?: string; resp?: string; desc?: string }>;
 }) {
+  const params = await searchParams;
   return (
     <div className="max-w-2xl mx-auto py-16 px-4 flex flex-col items-center text-center">
       <div className="w-20 h-20 bg-green-100 text-[var(--color-primary)] rounded-full flex items-center justify-center mb-6 shadow-sm border-4 border-white ring-1 ring-[var(--color-border)]">
@@ -26,7 +27,7 @@ export default function SuccessPage({
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-[var(--color-text-muted)]">Transaction Reference</p>
-              <p className="font-mono text-sm mt-1">{searchParams.txnref || 'WW-VERIFIED-782103'}</p>
+              <p className="font-mono text-sm mt-1">{params.txnref || 'WW-VERIFIED-782103'}</p>
             </div>
             <div className="text-right">
               <p className="text-sm font-medium text-[var(--color-text-muted)]">Status</p>

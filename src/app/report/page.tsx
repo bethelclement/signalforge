@@ -245,7 +245,7 @@ export default function ReportPage() {
              <div className="mt-8 pt-6 border-t border-[var(--color-border)] flex justify-end">
                <button 
                   onClick={handleAnalyzeUpload}
-                  disabled={!address || !selectedFile || isAnalyzing || isVerifyingKYC}
+                   disabled={!address || !selectedFile || !reporterName || !reporterNumber || isAnalyzing || isVerifyingKYC}
                   className="btn-primary flex items-center gap-2 px-8 py-3 shadow-md disabled:bg-emerald-300 disabled:cursor-not-allowed transition-all"
                >
                  {isVerifyingKYC ? (
