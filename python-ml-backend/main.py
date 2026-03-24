@@ -1,9 +1,10 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 import time
 import io
 import os
 import json
+import requests
 from PIL import Image
 import google.generativeai as genai
 
@@ -27,7 +28,7 @@ except ImportError:
     MODEL_LOADED = False
     print("HF Transformers/Torch not found. Local engine disabled.")
 
-app = FastAPI(title="WasteWise Perfect Predictor AI", version="2.5.0")
+app = FastAPI(title="WasteWise Perfect Predictor AI", version="2.6.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,76 +37,89 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Semantic Labels for CLIP (Optimized for Visual Understanding)
+# Enhanced Semantic Labels for CLIP (Optimized for Web/Google Image context)
 CANDIDATE_LABELS = [
-    "clear plastic PET water bottle",
-    "colored plastic beverage bottle",
-    "aluminum soda or beer can",
-    "metal tin or food container",
-    "cardboard shipping box",
-    "hard plastic detergent or milk jug",
-    "thin plastic sachet or shopping bag",
-    "plastic food container or tub",
-    "clear glass beverage bottle",
-    "green or amber glass bottle",
-    "small electronic device like a phone",
-    "car battery",
-    "leftover food scraps",
-    "dried leaves and branches",
-    "printed paper or newspaper",
-    "white styrofoam packaging",
-    "old clothes or fabric",
-    "concrete or wood construction waste",
-    "medical syringe or needle",
-    "general landfill trash",
-    "large industrial metal scrap"
+    "a photo of clear plastic PET water bottles",
+    "a photo of colored green or brown plastic bottles",
+    "a photo of aluminum soda or beer cans",
+    "a photo of metal tin food cans or containers",
+    "a photo of corrugated cardboard boxes and paper",
+    "a photo of hard plastic HDPE detergent or milk bottles",
+    "a photo of thin plastic LDPE bags and pure water sachets",
+    "a photo of plastic food containers and disposable tubs",
+    "a photo of clear glass beverage bottles",
+    "a photo of green or amber glass bottles",
+    "a photo of electronic waste, phones and computer parts",
+    "a photo of an automotive lead-acid car battery",
+    "a photo of biodegradable organic food scraps",
+    "a photo of dried leaves, branches and garden waste",
+    "a photo of office paper, magazines and newspapers",
+    "a photo of white styrofoam cups and packaging",
+    "a photo of old clothes, textiles and fabric waste",
+    "a photo of concrete, wood and construction debris",
+    "a photo of medical waste, syringes and needles",
+    "a photo of dirty non-recyclable landfill trash",
+    "a photo of rusty industrial metal scrap and steel"
 ]
 
 # Mapping semantic labels back to user-friendly UX categories
 UI_MAPPING = {
-    "clear plastic PET water bottle": "Clear PET Bottles (High Salvage)",
-    "colored plastic beverage bottle": "Mixed Colored PET Bottles",
-    "aluminum soda or beer can": "Aluminum Beverage Cans",
-    "metal tin or food container": "Tin/Scrap Metal Containers",
-    "cardboard shipping box": "Corrugated Cardboard (Baled)",
-    "hard plastic detergent or milk jug": "HDPE Plastics (Detergent/Milk)",
-    "thin plastic sachet or shopping bag": "LDPE Plastics (Pure Water Sachets)",
-    "plastic food container or tub": "Polypropylene (Food Packs)",
-    "clear glass beverage bottle": "Glass Bottles (Clear/Flint)",
-    "green or amber glass bottle": "Glass Bottles (Amber/Green)",
-    "small electronic device like a phone": "E-Waste (Small Electronics)",
-    "car battery": "Lead-Acid Car Batteries",
-    "leftover food scraps": "Biodegradable Food Waste",
-    "dried leaves and branches": "Yard/Garden Organic Waste",
-    "printed paper or newspaper": "Mixed Office Paper/Newsprint",
-    "white styrofoam packaging": "Polystyrene (Styrofoam)",
-    "old clothes or fabric": "Textiles & Old Clothing",
-    "concrete or wood construction waste": "Construction Debris",
-    "medical syringe or needle": "Hazardous Medical Waste",
-    "general landfill trash": "General Non-Recyclable",
-    "large industrial metal scrap": "Industrial Grade Scrap Metal"
+    "a photo of clear plastic PET water bottles": "Clear PET Bottles (High Salvage)",
+    "a photo of colored green or brown plastic bottles": "Mixed Colored PET Bottles",
+    "a photo of aluminum soda or beer cans": "Aluminum Beverage Cans",
+    "a photo of metal tin food cans or containers": "Tin/Scrap Metal Containers",
+    "a photo of corrugated cardboard boxes and paper": "Corrugated Cardboard (Baled)",
+    "a photo of hard plastic HDPE detergent or milk bottles": "HDPE Plastics (Detergent/Milk)",
+    "a photo of thin plastic LDPE bags and pure water sachets": "LDPE Plastics (Pure Water Sachets)",
+    "a photo of plastic food containers and disposable tubs": "Polypropylene (Food Packs)",
+    "a photo of clear glass beverage bottles": "Glass Bottles (Clear/Flint)",
+    "a photo of green or amber glass bottles": "Glass Bottles (Amber/Green)",
+    "a photo of electronic waste, phones and computer parts": "E-Waste (Small Electronics)",
+    "a photo of an automotive lead-acid car battery": "Lead-Acid Car Batteries",
+    "a photo of biodegradable organic food scraps": "Biodegradable Food Waste",
+    "a photo of dried leaves, branches and garden waste": "Yard/Garden Organic Waste",
+    "a photo of office paper, magazines and newspapers": "Mixed Office Paper/Newsprint",
+    "a photo of white styrofoam cups and packaging": "Polystyrene (Styrofoam)",
+    "a photo of old clothes, textiles and fabric waste": "Textiles & Old Clothing",
+    "a photo of concrete, wood and construction debris": "Construction Debris",
+    "a photo of medical waste, syringes and needles": "Hazardous Medical Waste",
+    "a photo of dirty non-recyclable landfill trash": "General Non-Recyclable",
+    "a photo of rusty industrial metal scrap and steel": "Industrial Grade Scrap Metal"
 }
 
 @app.post("/api/predict")
-async def analyze_waste_image(file: UploadFile = File(...)):
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Invalid file type. Must be an image.")
+async def analyze_waste_image(
+    file: UploadFile = File(None), 
+    url: str = Query(None, description="URL of an image to analyze from Google/Web")
+):
+    image = None
 
-    content = await file.read()
-    image = Image.open(io.BytesIO(content))
+    if file:
+        if not file.content_type.startswith("image/"):
+            raise HTTPException(status_code=400, detail="Invalid file type. Must be an image.")
+        content = await file.read()
+        image = Image.open(io.BytesIO(content))
+    elif url:
+        try:
+            response = requests.get(url, timeout=10)
+            image = Image.open(io.BytesIO(response.content))
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Could not load image from URL: {e}")
+    else:
+        raise HTTPException(status_code=400, detail="Provide either a file or a URL.")
 
     # --- PRIMARY: Gemini Vision (Cloud) ---
     if GEMINI_READY:
         try:
             prompt = """
-            You are WasteWise AI Pro, a premium environmental vision system for Lagos.
-            Identify the waste material shown. Respond strictly in JSON:
+            You are WasteWise AI Pro, trained on global waste datasets.
+            Identify the waste material in this image. Respond strictly in JSON:
             {
               "category": "String (Exactly one from the 21 provided categories)",
-              "volume": "Estimate size (Small, Medium, Large)",
+              "volume": "Estimate size (Small, Medium, Large, Industrial)",
               "estimatedCost": Number (Naira, 1500-25000),
               "confidence_score": Number,
-              "description": "2 expert sentences of visual analysis."
+              "description": "3 sentences of expert, factual visual analysis."
             }
             """
             response = gemini_model.generate_content([prompt, image])
@@ -120,9 +134,8 @@ async def analyze_waste_image(file: UploadFile = File(...)):
     # --- SECONDARY: High-Accuracy Local Zero-Shot (CLIP) ---
     if MODEL_LOADED:
         try:
-            # CLIP analyzes the image against all 21 candidates at once
             predictions = classifier(image, candidate_labels=CANDIDATE_LABELS)
-            best_pred = predictions[0] # Top match
+            best_pred = predictions[0] 
             semantic_label = best_pred["label"]
             confidence = best_pred["score"]
             ui_category = UI_MAPPING.get(semantic_label, "General Non-Recyclable")
@@ -135,7 +148,7 @@ async def analyze_waste_image(file: UploadFile = File(...)):
                     "volume": "Medium (2-3 bags)",
                     "estimatedCost": 3500,
                     "confidence_score": round(confidence, 2),
-                    "description": f"Highly factual Zero-Shot analysis (CLIP) verified this as '{semantic_label}' with {confidence:.1%} confidence."
+                    "description": f"Zero-Shot neural analysis (CLIP) factual match: '{semantic_label}' with {confidence:.1%} confidence."
                 }
             }
         except Exception as e:
@@ -145,10 +158,10 @@ async def analyze_waste_image(file: UploadFile = File(...)):
         "status": "success", "source": "STATIC_FALLBACK",
         "data": {
             "category": "General Non-Recyclable", "volume": "Medium", "estimatedCost": 2500,
-            "confidence_score": 0.50, "description": "Static fallback triggered. Machine learning engines unavailable."
+            "confidence_score": 0.50, "description": "Static fallback triggered."
         }
     }
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "engine": "Perfect Predictor v2.5.0 (CLIP)"}
+    return {"status": "ok", "engine": "Perfect Predictor v2.6.0 (CLIP + URL Support)"}

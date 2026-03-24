@@ -2,13 +2,15 @@ import os
 import sys
 import argparse
 import google.generativeai as genai
+import requests
+import io
 from PIL import Image
 import json
 
-def analyze_waste(image_path, api_key):
+def analyze_waste(image_source, api_key, is_url=False):
     """
-    WasteWise AI Pro — High-Fidelity Local Analysis (v2.5)
-    Uses Gemini 1.5 Flash with 21 high-accuracy waste categories.
+    WasteWise AI Pro — High-Fidelity Local Analysis (v2.6)
+    Supports direct local files and Google Image URLs.
     """
     if not api_key:
         print("Error: GEMINI_API_KEY not found. Please set it in your environment or use --key.")
@@ -18,7 +20,7 @@ def analyze_waste(image_path, api_key):
     model = genai.GenerativeModel('gemini-1.5-flash')
 
     prompt = """
-    You are WasteWise AI Pro, a premium environmental vision system for Lagos.
+    You are WasteWise AI Pro, trained on global waste datasets including Google Images.
     Identify the waste material shown. Respond strictly in JSON:
     {
       "category": "String (Select one of the 21 specialized categories)",
@@ -30,8 +32,14 @@ def analyze_waste(image_path, api_key):
     """
 
     try:
-        img = Image.open(image_path)
-        print(f"🚀 Analyzing {image_path} with Gemini 1.5 Pro Engine...")
+        if is_url:
+            print(f"🌐 Fetching image from URL: {image_source}...")
+            response = requests.get(image_source, timeout=10)
+            img = Image.open(io.BytesIO(response.content))
+        else:
+            img = Image.open(image_source)
+
+        print(f"🚀 Analyzing with Gemini 1.5 Pro Engine...")
         
         response = model.generate_content([prompt, img])
         
@@ -49,20 +57,29 @@ def analyze_waste(image_path, api_key):
         return None
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="WasteWise AI Pro - High-Fidelity Analysis v2.5")
-    parser.add_argument("--image", required=True, help="Path to the waste image")
+    parser = argparse.ArgumentParser(description="WasteWise AI Pro - Multi-Source Analysis v2.6")
+    parser.add_argument("--image", help="Path to the local waste image")
+    parser.add_argument("--url", help="URL of a waste image (e.g. from Google Images)")
     parser.add_argument("--key", help="Gemini API Key")
     
     args = parser.parse_args()
     
+    if not args.image and not args.url:
+        print("Usage: python3 wastewise-ai-pro.py --image <path> OR --url <url>")
+        sys.exit(1)
+    
     api_key = args.key or os.environ.get("GEMINI_API_KEY")
 
-    result = analyze_waste(args.image, api_key)
+    source = args.url if args.url else args.image
+    is_url = True if args.url else False
+
+    result = analyze_waste(source, api_key, is_url=is_url)
     
     if result:
         print("\n" + "💎"*25)
-        print(" WASTEWISE AI PRO v2.5 | PERFECT PREDICTOR")
+        print(" WASTEWISE AI PRO v2.6 | GOOGLE IMAGE EXPERT")
         print("💎"*25)
+        print(f" SOURCE TYPE: {'WEB URL' if is_url else 'LOCAL FILE'}")
         print(f" CATEGORY:    {result.get('category')}")
         print(f" VOLUME:      {result.get('volume')}")
         print(f" EST. COST:   N{result.get('estimatedCost', 0):,}")
