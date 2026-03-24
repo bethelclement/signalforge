@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// Extend Vercel serverless timeout to 30s — Gemini needs time for large mobile photos
+export const maxDuration = 30;
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
