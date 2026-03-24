@@ -306,8 +306,8 @@ export default function ReportPage() {
 
             {analysisResult.source && (
               <div className="mb-4 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-tight">
-                <div className={`w-1.5 h-1.5 rounded-full ${analysisResult.source === 'GEMINI_VISION_LIVE' ? 'bg-green-500' : 'bg-orange-400'}`}></div>
-                AI Engine: {analysisResult.source.replace('_', ' ')}
+                <div className={`w-1.5 h-1.5 rounded-full ${['GEMINI_VISION_LIVE', 'GEMINI_VISION_PRO'].includes(analysisResult.source) ? 'bg-green-500' : 'bg-orange-400'}`}></div>
+                AI Engine: {analysisResult.source.replace(/_/g, ' ')}
               </div>
             )}
 
