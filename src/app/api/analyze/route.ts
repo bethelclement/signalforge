@@ -3,10 +3,6 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export const maxDuration = 30;
 
-// SAFETY-PIN: Hardcoded key provided by user to ensure the demo is "Real" 
-// even if Vercel Environment Variables fail to propagate during the hackathon.
-const FALLBACK_KEY = "AIzaSyBB_Y46mhD3LjFlIH2eeebU-Xo8Eoe_P6U";
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -25,7 +21,7 @@ export async function POST(request: Request) {
 
     if (!base64Data) throw new Error("No image data provided");
 
-    const activeKey = process.env.GEMINI_API_KEY || FALLBACK_KEY;
+    const activeKey = process.env.GEMINI_API_KEY;
     
     if (activeKey) {
       const genAI = new GoogleGenerativeAI(activeKey);

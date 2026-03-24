@@ -7,8 +7,8 @@ import json
 from PIL import Image
 import google.generativeai as genai
 
-# SAFETY-PIN: Using provided key to ensure "Real" AI always works locally
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or "AIzaSyBB_Y46mhD3LjFlIH2eeebU-Xo8Eoe_P6U"
+# Gemini Setup
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
     gemini_model = genai.GenerativeModel('gemini-1.5-flash')

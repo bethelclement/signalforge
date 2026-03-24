@@ -56,8 +56,8 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    # SAFETY-PIN: Use provided key if nothing else is available
-    api_key = args.key or os.environ.get("GEMINI_API_KEY") or "AIzaSyBB_Y46mhD3LjFlIH2eeebU-Xo8Eoe_P6U"
+    # Using environment variable
+    api_key = args.key or os.environ.get("GEMINI_API_KEY")
 
     result = analyze_waste(args.image, api_key)
     
