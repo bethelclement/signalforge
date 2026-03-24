@@ -19,6 +19,7 @@ export default function ReportPage() {
     volume: string;
     estimatedCost: number;
     description: string;
+    source?: string;
   } | null>(null);
 
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -86,7 +87,8 @@ export default function ReportPage() {
           category: data.category || "Mixed Recyclables",
           volume: data.volume || "Medium (2-3 bags)",
           estimatedCost: data.estimatedCost || 2500,
-          description: data.description || "Machine learning engine processed the image."
+          description: data.description || "Machine learning engine processed the image.",
+          source: data.source || "UNKNOWN"
         });
         
       } catch (error) {
@@ -95,7 +97,8 @@ export default function ReportPage() {
           category: "Mixed Recyclables - Commercial Zone",
           volume: "Medium (2-3 bags)",
           estimatedCost: 2500,
-          description: "Neural engine routed to offline estimation. PSP dispatch ready."
+          description: "Neural engine routed to offline estimation. PSP dispatch ready.",
+          source: "LOCAL_FALLBACK"
         });
       } finally {
         setIsAnalyzing(false);
@@ -300,6 +303,13 @@ export default function ReportPage() {
                 Edit Report
               </button>
             </div>
+
+            {analysisResult.source && (
+              <div className="mb-4 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-tight">
+                <div className={`w-1.5 h-1.5 rounded-full ${analysisResult.source === 'GEMINI_VISION_LIVE' ? 'bg-green-500' : 'bg-orange-400'}`}></div>
+                AI Engine: {analysisResult.source.replace('_', ' ')}
+              </div>
+            )}
 
             <div className="bg-gray-50 rounded-lg p-6 grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 mb-6 border border-[var(--color-border)]">
               <div className="md:col-span-2 pb-4 border-b border-gray-200">
