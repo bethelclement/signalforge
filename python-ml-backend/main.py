@@ -2,18 +2,29 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import time
 import io
+import os
+import json
 from PIL import Image
+import google.generativeai as genai
 
-# Optional: Using transformers for real ML inference
+# Gemini Setup
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or "AIzaSyBB_Y46mhD3LjFlIH2eeebU-Xo8Eoe_P6U"
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+    gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+    GEMINI_READY = True
+else:
+    GEMINI_READY = False
+
+# Backup Vision Transformer (Local ViT)
 try:
     from transformers import pipeline
-    # Load a vision transformer model for image classification
-    print("Loading ML model (this may take a moment)...")
+    print("Loading local ViT model (fallback)...")
     classifier = pipeline("image-classification", model="google/vit-base-patch16-224")
     MODEL_LOADED = True
 except ImportError:
     MODEL_LOADED = False
-    print("Transformers not installed. Falling back to basic logic.")
+    print("Transformers not installed. Skipping local ViT.")
 
 app = FastAPI(title="WasteWise ML Engine API", version="1.0.0")
 
@@ -24,7 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Simulated ML Model Categories localized for Lagos based on ImageNet matches
+# Semantic Category Mapping for Lagos (used by the basic ViT fallback)
 CATEGORY_MAPPING = {
     "bottle": "Commercial Plastics - Oshodi Market",
     "plastic": "Commercial Plastics - Oshodi Market",
@@ -42,52 +53,77 @@ async def analyze_waste_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Invalid file type. Must be an image.")
 
     content = await file.read()
-    
-    predicted_category = "Mixed Recyclables - Lekki Phase 1" # Default
-    confidence = 0.85
-    description = "Model identified mixed waste requiring standard PSP handler."
-    
+    image = Image.open(io.BytesIO(content))
+
+    # --- PRIMARY: Gemini Vision ---
+    if GEMINI_READY:
+        try:
+            prompt = """
+            You are WasteWise AI Pro, a premium environmental computer vision system.
+            Analyze this image and identify the exact waste material shown.
+            Output JSON strictly: {
+              "category": "String (e.g. 'PET Plastic Bottles')",
+              "volume": "String (e.g. 'Medium (2 bags)')",
+              "estimatedCost": Number (Naira, 1500-5000),
+              "confidence_score": Number,
+              "description": "2 sentences of expert visual analysis."
+            }
+            """
+            
+            response = gemini_model.generate_content([prompt, image])
+            text = response.text
+            start, end = text.find('{'), text.rfind('}')
+            if start != -1 and end != -1:
+                data = json.loads(text[start:end+1])
+                return {
+                    "status": "success",
+                    "source": "GEMINI_VISION_PRO",
+                    "data": data
+                }
+        except Exception as e:
+            print(f"Gemini error: {e}")
+
+    # --- FALLBACK: Vision Transformer (ViT) ---
     if MODEL_LOADED:
         try:
-            image = Image.open(io.BytesIO(content))
             predictions = classifier(image)
-            
-            # Find the best prediction
             best_pred = predictions[0]
             label = best_pred["label"].lower()
             confidence = best_pred["score"]
+            predicted_category = "Mixed Recyclables - Commercial Axis"
             
-            # Map ImageNet label to our categories
-            matched = False
             for key, val in CATEGORY_MAPPING.items():
                 if key in label:
                     predicted_category = val
-                    matched = True
                     break
             
-            if not matched:
-                predicted_category = f"Unclassified ({best_pred['label']})"
-            
-            description = f"Neural Net detected '{best_pred['label']}' with {confidence:.1%} confidence. Assigned to: {predicted_category}."
-            
+            return {
+                "status": "success",
+                "source": "LOCAL_VIT_FALLBACK",
+                "data": {
+                    "category": predicted_category,
+                    "volume": "Medium (2-3 bags)",
+                    "estimatedCost": 2500,
+                    "confidence_score": round(confidence, 2),
+                    "description": f"Local AI model (ViT) detected '{best_pred['label']}' with {confidence:.1%} confidence."
+                }
+            }
         except Exception as e:
-            print("ML Inference Error:", e)
+            print(f"ViT error: {e}")
 
-    estimated_volume = "Medium (2-3 bags)"
-    base_cost = 2500
-    
+    # --- LAST RESORT: Static Fallback ---
     return {
         "status": "success",
-        "model_version": "v2.0.0_vit_lagos" if MODEL_LOADED else "v1.0.0_fallback",
+        "source": "STATIC_FALLBACK",
         "data": {
-            "category": predicted_category,
-            "volume": estimated_volume,
-            "estimatedCost": base_cost,
-            "confidence_score": round(confidence, 2),
-            "description": description
+            "category": "Mixed Recyclables",
+            "volume": "Medium",
+            "estimatedCost": 2500,
+            "confidence_score": 0.50,
+            "description": "Static fallback triggered. Machine learning engines unavailable."
         }
     }
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "service": "WasteWise ML Python Engine"}
+    return {"status": "ok", "service": "WasteWise ML Python Engine PRO"}
