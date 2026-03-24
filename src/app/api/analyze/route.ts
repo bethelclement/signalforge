@@ -6,28 +6,44 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { imageBase64 } = body;
 
-    const base64Data = imageBase64 ? imageBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : "";
+    let mimeType = "image/jpeg";
+    let base64Data = imageBase64 || "";
+
+    // Strictly parse the Data URL to dynamically support PNG, HEIC, WEBP, JPEG
+    if (base64Data.startsWith("data:")) {
+      const parts = base64Data.split(",");
+      if (parts.length === 2) {
+        mimeType = parts[0].split(";")[0].split(":")[1]; // Extract precise mime type
+        base64Data = parts[1];
+      }
+    }
+
     if (!base64Data) throw new Error("No image data provided");
 
-    const buffer = Buffer.from(base64Data, 'base64');
-    const blob = new Blob([buffer], { type: 'image/jpeg' });
-    const formData = new FormData();
-    formData.append('file', blob, 'image.jpg');
+    const host = request.headers.get('host') || "";
+    const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
 
-    // 1. Try local Python Backend (Works flawlessly for localhost laptop demo)
-    try {
-        const backendRes = await fetch('http://127.0.0.1:8000/api/predict', {
-            method: 'POST',
-            body: formData,
-            signal: AbortSignal.timeout(2000)
-        });
-        
-        if (backendRes.ok) {
-            const result = await backendRes.json();
-            return NextResponse.json(result.data);
+    // 1. Try local Python Backend (ONLY if running on localhost to save Vercel Timeout seconds)
+    if (isLocalhost) {
+        try {
+            const buffer = Buffer.from(base64Data, 'base64');
+            const blob = new Blob([buffer], { type: mimeType });
+            const formData = new FormData();
+            formData.append('file', blob, 'image.jpg');
+
+            const backendRes = await fetch('http://127.0.0.1:8000/api/predict', {
+                method: 'POST',
+                body: formData,
+                signal: AbortSignal.timeout(2000)
+            });
+            
+            if (backendRes.ok) {
+                const result = await backendRes.json();
+                return NextResponse.json(result.data);
+            }
+        } catch (localErr) {
+            console.log("Local Python offline. Initiating highly-conscious Gemini 1.5 Flash Vision engine...");
         }
-    } catch (localErr) {
-        console.log("Local Python offline. Initiating highly-conscious Gemini 1.5 Flash Vision engine...");
     }
 
     // 2. Vercel Production Fallback: Gemini 1.5 Flash Vision Neural Engine
@@ -37,7 +53,7 @@ export async function POST(request: Request) {
             volume: "N/A",
             estimatedCost: 0,
             confidence_score: 0.0,
-            description: "CRITICAL: The free HuggingFace API is overloaded. Please add 'GEMINI_API_KEY' to your Vercel Environment Variables to deploy the true Google Vision model. Vercel cannot reach your localhost Python backend."
+            description: "CRITICAL: Please add 'GEMINI_API_KEY' to your Vercel Environment Variables to deploy the true Google Vision model. Vercel cannot reach your localhost Python backend."
         });
     }
 
@@ -59,8 +75,9 @@ export async function POST(request: Request) {
 
     const result = await model.generateContent([
        prompt, 
-       { inlineData: { data: base64Data, mimeType: "image/jpeg" } }
+       { inlineData: { data: base64Data, mimeType: mimeType } }
     ]);
+
     
     const responseText = result.response.text();
     
