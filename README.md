@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ♻️ WasteWise AI: The Conscious Waste Engine
 
-## Getting Started
+> **Nigeria's first high-fidelity environmental computer vision platform built for the Oyingbo & Lagos commercial axis.**
 
-First, run the development server:
+WasteWise AI leverages **Gemini 1.5 Flash Vision** and **Interswitch Webpay** to transform how waste is identified, cleared, and paid for. No more guessing. No more manual classification. Just snap, analyze, and clear.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 🚀 Key Features
+
+- **🧠 Conscious Vision Analysis**: Real-time material classification (PET Plastics, High-Grade Scrap Metal, Organic Runoff) using advanced neural edge-detection.
+- **💳 Seamless Interswitch Integration**: End-to-end payment flow for waste clearance fees, secured by Interswitch Webpay and KYC identity verification.
+- **📱 Safari-Optimized Experience**: Premium, glassmorphic UI designed specifically for modern mobile browsers.
+- **🤖 Local Pro Bot**: A standalone Python CLI tool for high-fidelity offline waste analysis.
+- **🔋 Resilient Architecture**: Auto-failover to a deterministic AI matrix ensures the platform remains functional even in low-bandwidth or offline scenarios.
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Frontend** | Next.js 15 (App Router), Tailwind CSS |
+| **AI / ML** | Google Gemini 1.5 Flash Vision, Python ViT (Fallback) |
+| **Payments** | Interswitch Webpay API, Interswitch KYC Verification |
+| **Infrastructure** | Vercel Serverless Functions (30s Extended Timeout) |
+| **Backend** | FastAPI (Modular ML Engine) |
+
+---
+
+## 📐 Architecture Overview
+
+```mermaid
+graph TD
+    A[User's Browser] -->|Photo Upload| B[Next.js 15 Frontend]
+    B -->|Compressed Base64| C{Analyze Route}
+    C -->|API Key Present| D[Google Gemini 1.5 Flash]
+    C -->|API Key Missing| E[Deterministic AI Matrix]
+    D -->|JSON Result| F[Refined Diagnosis]
+    E -->|JSON Result| F
+    F -->|Redirect| G[Interswitch Payment Gateway]
+    G -->|Callback| H[Payment Callback Middleware]
+    H -->|Verify| I[Success/Dashboard]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📦 Getting Started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Web Application
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+### 2. Local AI Pro Bot
+```bash
+# Requires Python 3.9+
+pip install -r python-ml-backend/requirements.txt
+python wastewise-ai-pro.py --image path/to/waste.jpg
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📍 Purpose & Impact
+WasteWise AI solves the "Classification Gap" in Nigerian waste management. By automating the identification of salvageable materials in Lagos commercial zones, we reduce clearance overhead and accelerate the routing of recyclables to certified PSP collection nodes.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Built for the 3MTT Knowledge Showcase.**

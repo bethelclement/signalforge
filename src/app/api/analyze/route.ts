@@ -124,12 +124,18 @@ export async function POST(request: Request) {
       "Heuristic depth-mapping identified compact waste clusters with mixed salvageable material ratio above 80%. Clearance vector generated and dispatched to assigned PSP operator.",
     ];
 
+    // Diagnostics for judges and user
+    const isKeyMissing = !process.env.GEMINI_API_KEY;
+    const diagNote = isKeyMissing 
+      ? "\n\n[DIAGNOSTIC: GEMINI_API_KEY is currently MISSING from server environment. Please redeploy with the key set in Vercel.]" 
+      : "";
+
     return NextResponse.json({
       category: picked.label,
       volume: volumes[seed % volumes.length],
       estimatedCost: picked.cost,
       confidence_score: Number((0.91 + ((seed % 70) / 1000)).toFixed(3)),
-      description: insights[seed % insights.length],
+      description: insights[seed % insights.length] + diagNote,
       source: "DETERMINISTIC_FALLBACK"
     });
   }
