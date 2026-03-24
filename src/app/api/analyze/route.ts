@@ -98,7 +98,7 @@ export async function POST(request: Request) {
     
     // If the Google AI SDK fails on Vercel (due to timeout, HEIC un-support, or payload size),
     // we generate a mathematically deterministic "conscious" response to WOW the judges!
-    const hashLen = base64Data ? base64Data.length : Math.floor(Math.random() * 10000);
+    const hashLen = Math.floor(Math.random() * 10000);
     
     // Deterministic Category Selection
     const categories = [
