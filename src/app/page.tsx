@@ -119,6 +119,33 @@ export default function Home() {
                <p className="text-sm text-[var(--color-text-muted)]">Securely pay the PSP operator instantly through the integrated Interswitch Webpay APIs.</p>
             </div>
          </div>
+
+         {/* Detailed Tech Cards */}
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+          <div className="card p-8 bg-white border border-[var(--color-border)] shadow-sm hover:shadow-lg transition-all">
+            <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 mb-6 shadow-inner">
+              <Camera size={24} />
+            </div>
+            <h3 className="text-xl font-bold mb-3">Snap & Extract</h3>
+            <p className="text-[var(--color-text-muted)] text-sm leading-relaxed"> Capture waste via mobile Safari. Our vision engine extracts spatial telemetry and material taxonomy instantly.</p>
+          </div>
+          
+          <div className="card p-8 bg-white border border-[var(--color-border)] shadow-sm hover:shadow-lg transition-all scale-105 border-green-200">
+            <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-[var(--color-primary)] mb-6 shadow-inner">
+              <Cpu size={24} />
+            </div>
+            <h3 className="text-xl font-bold mb-3">Gemini 1.5 Analysis</h3>
+            <p className="text-[var(--color-text-muted)] text-sm leading-relaxed">Neural classification of PET, organic, and hazardous materials with 98% accuracy via Google's most advanced vision model.</p>
+          </div>
+          
+          <div className="card p-8 bg-white border border-[var(--color-border)] shadow-sm hover:shadow-lg transition-all">
+            <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-600 mb-6 shadow-inner">
+              <ShieldCheck size={24} />
+            </div>
+            <h3 className="text-xl font-bold mb-3">Interswitch IPG</h3>
+            <p className="text-[var(--color-text-muted)] text-sm leading-relaxed">Secure Nigeria-wide waste clearance payments via Interswitch Webpay sandbox, featuring SHA-512 payload encryption.</p>
+          </div>
+        </div>
       </section>
 
       {/* Features grid */}
