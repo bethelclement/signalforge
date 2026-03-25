@@ -93,7 +93,7 @@ This project was built by a multi-disciplinary team for the Enyata x Interswitch
 - **Clement Bethel Chinedu** (Team Lead)
   - **Technical**: Lead Full-Stack Development, Interswitch IPG Integration (Webpay), Gemini AI Prompt Engineering, and Deterministic Failover Logic.
   - **Non-Technical**: Product Vision, Systems Architecture Design, and Project Documentation.
-- **Team Member 2** (Insert Name)
+- **Elvis Eze** (AI/ML Engineer)
   - **Technical**: UI/UX Implementation, Tailwind CSS Styling, and Safari Browser Optimization.
   - **Non-Technical**: User Research (Lagos Waste Hotspots) and Quality Assurance Testing.
 
