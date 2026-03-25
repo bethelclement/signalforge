@@ -129,13 +129,32 @@ export default function ReportPage() {
       });
       
       const config = await res.json();
-      setPaymentConfig(config);
       
-      // We need to wait for state to update, then submit the hidden form
-      setTimeout(() => {
-        const form = document.getElementById('interswitch-checkout-form') as HTMLFormElement;
-        if (form) form.submit();
-      }, 500);
+      // DEEP ACT: Instead of waiting for state update, create a dynamic form post instantly
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = config.action_url;
+      
+      const fields = {
+        product_id: config.product_id,
+        pay_item_id: config.pay_item_id,
+        amount: config.amount,
+        currency: config.currency,
+        site_redirect_url: config.site_redirect_url,
+        txn_ref: config.txn_ref,
+        hash: config.hash
+      };
+
+      Object.entries(fields).forEach(([key, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value.toString();
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
 
     } catch (error) {
       console.error('Payment initialization failed', error);
