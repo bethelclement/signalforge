@@ -63,64 +63,64 @@ export default function Dashboard() {
         {/* Header & Interswitch Badge */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--color-text-main)]">Lagos PSP Telemetry</h1>
-            <p className="text-sm text-[var(--color-text-muted)]">Real-time ML reporting and Interswitch gateway flow.</p>
+            <h1 className="text-3xl font-extrabold tracking-tight gradient-text">Lagos PSP Telemetry</h1>
+            <p className="text-sm text-[var(--color-text-muted)] font-medium">Real-time ML reporting and Interswitch gateway flow.</p>
           </div>
-          <div className="flex items-center gap-2 bg-white border border-[var(--color-border)] px-4 py-2 rounded-lg shadow-sm">
+          <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md border border-[var(--color-border)] px-4 py-2 rounded-xl shadow-sm">
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
             </span>
-            <span className="text-xs font-semibold text-[var(--color-text-main)]">ISW Gateway Active</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-main)]">ISW Gateway Active</span>
           </div>
         </div>
 
         {/* Global Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="card p-6 bg-white border border-[var(--color-border)] shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 text-center sm:text-left">
+          <div className="card p-6 border-l-4 border-l-[var(--color-primary)]">
             <div className="flex justify-between items-start mb-4">
-              <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center text-[var(--color-primary)]">
-                <Activity size={20} />
+              <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-[var(--color-primary)] shadow-inner">
+                <Activity size={24} />
               </div>
-              <span className="flex items-center text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded">
-                +12% <TrendingUp size={12} className="ml-1"/>
+              <span className="flex items-center text-[10px] font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full uppercase tracking-wider">
+                Stable <TrendingUp size={10} className="ml-1"/>
               </span>
             </div>
-            <p className="text-sm font-medium text-[var(--color-text-muted)]">Total Cleared Tonnage</p>
-            <h3 className="text-3xl font-bold text-[var(--color-text-main)] mt-1">1,248t</h3>
+            <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Cleared Tonnage</p>
+            <h3 className="text-4xl font-black tracking-tighter text-[var(--color-text-main)] mt-1">1,248<span className="text-lg font-bold text-gray-400 ml-1">t</span></h3>
           </div>
 
-          <div className="card p-6 bg-white border-b-4 border-b-[#D22B2B] shadow-sm">
+          <div className="card p-6 border-l-4 border-l-[#D22B2B]">
             <div className="flex justify-between items-start mb-4">
-              <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center text-[#D22B2B]">
-                <ShieldCheck size={20} />
+              <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-[#D22B2B] shadow-inner">
+                <ShieldCheck size={24} />
               </div>
             </div>
-            <p className="text-sm font-medium text-[var(--color-text-muted)]">ISW Processed Revenue</p>
-            <h3 className="text-3xl font-bold text-[#D22B2B] mt-1">₦4.2M</h3>
+            <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">ISW Revenue</p>
+            <h3 className="text-4xl font-black tracking-tighter text-[#D22B2B] mt-1">₦4.2<span className="text-lg font-bold text-red-300 ml-1">M</span></h3>
           </div>
 
-          <div className="card p-6 bg-white border border-[var(--color-border)] shadow-sm">
+          <div className="card p-6 border-l-4 border-l-blue-500">
             <div className="flex justify-between items-start mb-4">
-              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                <Cpu size={20} />
+              <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-inner">
+                <Cpu size={24} />
               </div>
-              <span className="flex items-center text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded">
-                98.4% Acc.
+              <span className="flex items-center text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-1 rounded-full uppercase tracking-wider">
+                98% ACC
               </span>
             </div>
-            <p className="text-sm font-medium text-[var(--color-text-muted)]">AI Vision Extractions</p>
-            <h3 className="text-3xl font-bold text-[var(--color-text-main)] mt-1">8,409</h3>
+            <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">AI Extractions</p>
+            <h3 className="text-4xl font-black tracking-tighter text-[var(--color-text-main)] mt-1">8,409</h3>
           </div>
 
-          <div className="card p-6 bg-white border border-[var(--color-border)] shadow-sm">
+          <div className="card p-6 border-l-4 border-l-amber-500">
             <div className="flex justify-between items-start mb-4">
-              <div className="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center text-yellow-600">
-                <MapPin size={20} />
+              <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shadow-inner">
+                <MapPin size={24} />
               </div>
             </div>
-            <p className="text-sm font-medium text-[var(--color-text-muted)]">Active Hotspots</p>
-            <h3 className="text-3xl font-bold text-[var(--color-text-main)] mt-1">12</h3>
+            <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Hotspots</p>
+            <h3 className="text-4xl font-black tracking-tighter text-[var(--color-text-main)] mt-1">12</h3>
           </div>
         </div>
 

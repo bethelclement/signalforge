@@ -13,47 +13,52 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased min-h-screen flex flex-col bg-[var(--color-background-alt)] text-[var(--color-text-main)] font-sans">
-        <header className="bg-white border-b border-[var(--color-border)] shadow-sm sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[var(--color-primary)] rounded flex items-center justify-center text-white font-bold text-lg">
+      <body className="antialiased min-h-screen flex flex-col bg-grid-pattern text-[var(--color-text-main)] overflow-x-hidden">
+        <header className="bg-white/90 backdrop-blur-md border-b border-[var(--color-border)] sticky top-0 z-50 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-linear-to-br from-[var(--color-primary)] to-[var(--color-primary-dark)] rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-green-500/20">
                 W
               </div>
-              <span className="font-bold text-xl tracking-tight text-[var(--color-text-main)]">
-                WasteWise <span className="text-[var(--color-primary)]">AI</span>
-              </span>
+              <div className="flex flex-col -space-y-1">
+                <span className="font-black text-2xl tracking-tighter text-[var(--color-secondary)] uppercase">
+                  WasteWise <span className="text-[var(--color-primary)]">AI</span>
+                </span>
+                <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.3em] ml-0.5">SignalForge Pro</span>
+              </div>
             </div>
-            <nav className="hidden md:flex space-x-8">
-              <a href="#features" className="text-sm font-medium text-gray-600 hover:text-[var(--color-primary)] transition-colors">Features</a>
-              <a href="#how-it-works" className="text-sm font-medium text-gray-600 hover:text-[var(--color-primary)] transition-colors">How it Works</a>
+            <nav className="hidden lg:flex items-center space-x-10">
+              <a href="/dashboard" className="text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors uppercase tracking-widest">Telemetry</a>
+              <a href="/#how-it-works" className="text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors uppercase tracking-widest">System</a>
             </nav>
             <div className="flex items-center gap-4">
-              <a href="/report" className="btn-primary text-sm py-2 px-4 shadow-sm">
-                Report Waste
+              <a href="/report" className="btn-primary text-xs py-2.5 px-6 shadow-xl uppercase tracking-widest">
+                Deploy Report
               </a>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
           {children}
         </main>
 
-        <footer className="bg-white border-t border-[var(--color-border)] mt-auto">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center justify-center text-center gap-4">
-             <div className="flex items-center gap-3 mb-2">
-                <span className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Built during</span>
+        <footer className="bg-white border-t border-[var(--color-border)] mt-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col items-center justify-center text-center">
+             <div className="flex items-center gap-3 mb-6">
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.5em]">Engineered for Excellence</span>
              </div>
-             <p className="text-xl font-bold text-gray-800 flex items-center gap-2">
-               Enyata <span className="font-light text-gray-400">x</span> <span className="italic text-blue-800">Interswitch<span className="text-red-500">.</span></span>
-             </p>
-             <p className="text-xs text-gray-500 tracking-wider">Build-a-thon 2026</p>
-             <div className="h-px w-24 bg-gray-200 my-4"></div>
-             <div className="text-sm text-gray-400 flex flex-col md:flex-row gap-4 items-center">
-                <p>&copy; 2026 SignalForge. All rights reserved.</p>
-                <div className="hidden md:block w-1 h-1 bg-gray-300 rounded-full"></div>
-                <p>Sustainable waste intelligence for Nigeria.</p>
+             <div className="flex items-center gap-8 mb-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+               <p className="text-2xl font-black text-gray-800 flex items-center gap-3">
+                 Enyata <span className="font-light text-gray-300">/</span> <span className="italic text-blue-900">Interswitch<span className="text-red-500">.</span></span>
+               </p>
+             </div>
+             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-8">Official Build-a-thon 2026 Submission</p>
+             <div className="h-px w-32 bg-linear-to-r from-transparent via-gray-200 to-transparent mb-8"></div>
+             <div className="text-xs text-gray-400 flex flex-col md:flex-row gap-6 items-center font-medium">
+                <p>&copy; 2026 SIGNALFORGE. ALL RIGHTS RESERVED.</p>
+                <div className="hidden md:block w-1.5 h-1.5 bg-[var(--color-primary)]/30 rounded-full"></div>
+                <p className="uppercase tracking-widest">Lagos Commercial Waste Intelligence</p>
              </div>
           </div>
         </footer>
