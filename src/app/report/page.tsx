@@ -192,7 +192,7 @@ export default function ReportPage() {
           <div className="card p-5 sm:p-8 bg-white border border-[var(--color-border)] shadow-sm">
              <h2 className="text-xl font-bold mb-6 text-[var(--color-text-main)] border-b pb-4 flex flex-col sm:flex-row sm:items-center gap-3">
                 Incident Details
-                <span className="text-[10px] uppercase font-bold tracking-widest bg-blue-50 text-blue-700 w-fit px-2 py-1 rounded border border-blue-200">Protected by ISW KYC</span>
+                <span className="text-[10px] uppercase font-bold tracking-widest bg-blue-50 text-blue-700 w-fit px-2 py-1 rounded border border-blue-200">Interswitch ID Verified</span>
              </h2>
              
              <div className="space-y-6">
