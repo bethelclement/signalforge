@@ -3,11 +3,11 @@ import { ArrowRight, BarChart3, Camera, ShieldCheck, Zap, MapPin } from "lucide-
 
 export default function Home() {
   return (
-    <div className="flex flex-col gap-16 pb-16 relative w-full">
-      <div className="absolute inset-0 bg-grid-pattern -z-10 h-[600px] w-full [mask-image:linear-gradient(to_bottom,white,transparent)] pointer-events-none"></div>
+    <div className="flex flex-col gap-12 pb-16 relative w-full overflow-hidden">
+      <div className="absolute inset-0 bg-grid-pattern -z-10 h-[800px] w-full [mask-image:linear-gradient(to_bottom,white,transparent)] pointer-events-none"></div>
       
       {/* System Health Status - Judge Impact */}
-      <div className="flex items-center justify-center gap-6 px-4 py-2 bg-gray-900 text-white rounded-full mx-auto text-[10px] font-bold uppercase tracking-[0.2em] shadow-2xl animate-in fade-in slide-in-from-top-2 duration-700">
+      <div className="flex items-center justify-center gap-6 px-4 py-2 bg-gray-900 text-white rounded-full mx-auto text-[10px] font-bold uppercase tracking-[0.2em] shadow-2xl z-20 sticky top-24 animate-in fade-in slide-in-from-top-4 duration-1000">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
           <span>Gemini 1.5 Flash : Operational</span>

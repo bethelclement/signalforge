@@ -188,7 +188,7 @@ export default function ReportPage() {
       </div>
 
       {step === 1 && (
-        <div className="animate-in fade-in duration-500 space-y-6">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-6 min-h-[600px]">
           <div className="card p-5 sm:p-8 bg-white border border-[var(--color-border)] shadow-sm">
              <h2 className="text-xl font-bold mb-6 text-[var(--color-text-main)] border-b pb-4 flex flex-col sm:flex-row sm:items-center gap-3">
                 Incident Details

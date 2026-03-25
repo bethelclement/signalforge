@@ -29,6 +29,8 @@
   
   .btn-secondary {
     @apply bg-white/80 backdrop-blur-md text-[var(--color-text-main)] border border-[var(--color-border)] px-8 py-3 rounded-xl font-semibold hover:bg-white hover:border-[var(--color-primary)] transition-all duration-300 shadow-sm flex items-center justify-center gap-2;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
 
   .glass-panel {
@@ -45,6 +47,7 @@
   .card {
     @apply bg-white/80 backdrop-blur-md rounded-2xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-shadow duration-300;
     -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
 
   .input-field {
