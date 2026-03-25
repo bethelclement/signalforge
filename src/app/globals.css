@@ -44,6 +44,7 @@
 
   .card {
     @apply bg-white/80 backdrop-blur-md rounded-2xl border border-[var(--color-border)] shadow-sm hover:shadow-md transition-shadow duration-300;
+    -webkit-backdrop-filter: blur(12px);
   }
 
   .input-field {

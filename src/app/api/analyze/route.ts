@@ -25,12 +25,11 @@ export async function POST(request: Request) {
     // 2. Handle Base64-based analysis (Direct Upload)
     else if (imageBase64) {
       base64Data = imageBase64;
-      if (base64Data.startsWith("data:")) {
+      if (base64Data.includes(",")) {
         const parts = base64Data.split(",");
-        if (parts.length === 2) {
-          mimeType = parts[0].split(";")[0].split(":")[1];
-          base64Data = parts[1];
-        }
+        base64Data = parts[1];
+        const match = parts[0].match(/:(.*?);/);
+        if (match) mimeType = match[1];
       }
     }
 
