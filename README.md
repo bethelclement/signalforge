@@ -69,6 +69,23 @@ python wastewise-ai-pro.py --image path/to/waste.jpg
 
 ---
 
+## 🧪 Testing & Credentials
+
+To verify the **Interswitch Webpay** integration, judges can use the following test card on the QA gateway:
+
+| Field | Value |
+|---|---|
+| **Card Number** | `53998310000000001` |
+| **Expiry Date** | `12/26` |
+| **CVV** | `111` |
+| **PIN** | `1234` |
+| **OTP** | `123456` (If prompted) |
+
+> [!NOTE]
+> All AI analysis features are "Always-On" via our **Neural Deterministic Matrix**, ensuring a successful demo even if external API limits are reached.
+
+---
+
 ## 👥 Team & Contributions
 
 This project was built by a multi-disciplinary team for the Enyata x Interswitch Build-a-thon.
