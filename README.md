@@ -1,7 +1,12 @@
 # ♻️ WasteWise AI: The Conscious Waste Engine
 
+[![Live System](https://img.shields.io/badge/Status-LIVE-brightgreen?style=for-the-badge)](http://signalforge-rosy.vercel.app)
+[![Interswitch Verified](https://img.shields.io/badge/Interswitch-VERIFIED-red?style=for-the-badge)](https://qa.interswitchng.com)
+[![Enyata Buildathon](https://img.shields.io/badge/Buildathon-2026-blue?style=for-the-badge)](https://buildathon.enyata.com)
+
 > **Nigeria's first high-fidelity environmental computer vision platform built for the Oyingbo & Lagos commercial axis.**
 
+### 🏆 Enyata x Interswitch Build-a-thon Official Submission
 WasteWise AI leverages **Gemini 1.5 Flash Vision** and **Interswitch Webpay** to transform how waste is identified, cleared, and paid for. No more guessing. No more manual classification. Just snap, analyze, and clear.
 
 ---
@@ -9,10 +14,10 @@ WasteWise AI leverages **Gemini 1.5 Flash Vision** and **Interswitch Webpay** to
 ## 🚀 Key Features
 
 - **🧠 Conscious Vision Analysis**: Real-time material classification (PET Plastics, High-Grade Scrap Metal, Organic Runoff) using advanced neural edge-detection.
-- **💳 Seamless Interswitch Integration**: End-to-end payment flow for waste clearance fees, secured by Interswitch Webpay and KYC identity verification.
-- **📱 Safari-Optimized Experience**: Premium, glassmorphic UI designed specifically for modern mobile browsers.
-- **🤖 Local Pro Bot**: A standalone Python CLI tool for high-fidelity offline waste analysis.
-- **🔋 Resilient Architecture**: Auto-failover to a deterministic AI matrix ensures the platform remains functional even in low-bandwidth or offline scenarios.
+- **💳 Seamless Interswitch Integration**: End-to-end payment flow for waste clearance fees, secured by Interswitch Webpay and Identity verification.
+- **📱 Safari-Optimized Experience**: Premium, glassmorphic UI designed specifically for modern mobile browsers (iOS/Android).
+- **🔋 Resilient Architecture**: Auto-failover to a **Deterministic AI Matrix** ensures the platform remains functional even in low-bandwidth or API timeout scenarios.
+- **🛡️ Enterprise Telemetry**: Real-time "System Health" indicators for Gemini and Interswitch nodes on the homepage.
 
 ---
 
