@@ -67,7 +67,22 @@ python wastewise-ai-pro.py --image path/to/waste.jpg
 
 ---
 
+---
+
+## 👥 Team & Contributions
+
+This project was built by a multi-disciplinary team for the Enyata x Interswitch Build-a-thon.
+
+- **Clement Bethel Chinedu** (Team Lead)
+  - **Technical**: Lead Full-Stack Development, Interswitch IPG Integration (Webpay), Gemini AI Prompt Engineering, and Deterministic Failover Logic.
+  - **Non-Technical**: Product Vision, Systems Architecture Design, and Project Documentation.
+- **Team Member 2** (Insert Name)
+  - **Technical**: UI/UX Implementation, Tailwind CSS Styling, and Safari Browser Optimization.
+  - **Non-Technical**: User Research (Lagos Waste Hotspots) and Quality Assurance Testing.
+
+---
+
 ## 📍 Purpose & Impact
 WasteWise AI solves the "Classification Gap" in Nigerian waste management. By automating the identification of salvageable materials in Lagos commercial zones, we reduce clearance overhead and accelerate the routing of recyclables to certified PSP collection nodes.
 
-**Built for the 3MTT Knowledge Showcase.**
+**Built for the Enyata x Interswitch Build-a-thon 2026.**
