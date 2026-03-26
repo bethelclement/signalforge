@@ -19,7 +19,7 @@ describe('GET /api/health', () => {
     expect(data.gemini).toHaveProperty('status');
     expect(data.gemini).toHaveProperty('model');
     expect(['operational', 'degraded', 'offline']).toContain(data.gemini.status);
-    expect(data.gemini.model).toBe('gemini-1.5-flash');
+    expect(data.gemini.model).toBe('gemini-2.0-flash');
   });
 
   it('returns valid interswitch status shape', async () => {

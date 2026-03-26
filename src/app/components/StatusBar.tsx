@@ -67,7 +67,7 @@ export default function StatusBar() {
         {gemini === 'loading' ? (
           <span className="inline-block w-28 h-2.5 rounded bg-gray-700 animate-pulse" />
         ) : (
-          <span>Gemini 1.5 Flash : {label(gemini)}</span>
+          <span>Gemini 2.0 Flash : {label(gemini)}</span>
         )}
       </div>
 

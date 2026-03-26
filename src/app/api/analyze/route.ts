@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     
     if (activeKey) {
       const genAI = new GoogleGenerativeAI(activeKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
       const prompt = `
         You are WasteWise AI Pro, a 'Google Image Expert' trained on global waste datasets.
