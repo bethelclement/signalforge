@@ -125,7 +125,10 @@ export default function ReportPage() {
       const res = await fetch('/api/pay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: (analysisResult?.estimatedCost || 2500) * 100 })
+        body: JSON.stringify({
+          amount: (analysisResult?.estimatedCost || 2500) * 100,
+          email: (document.querySelector('input[name="email"]') as HTMLInputElement)?.value || 'user@signalforge.io'
+        })
       });
       
       const config = await res.json();
@@ -136,13 +139,14 @@ export default function ReportPage() {
       form.action = config.action_url;
       
       const fields = {
-        product_id: config.product_id,
+        merchant_code: config.merchant_code,
         pay_item_id: config.pay_item_id,
         amount: config.amount,
         currency: config.currency,
         site_redirect_url: config.site_redirect_url,
         txn_ref: config.txn_ref,
-        hash: config.hash
+        hash: config.hash,
+        cust_email: config.cust_email
       };
 
       Object.entries(fields).forEach(([key, value]) => {
@@ -430,13 +434,14 @@ export default function ReportPage() {
             {/* Hidden Interswitch Checkout Form */}
             {paymentConfig && (
               <form id="interswitch-checkout-form" action={paymentConfig.action_url} method="POST" style={{ display: 'none' }}>
-                <input type="hidden" name="product_id" value={paymentConfig.product_id} />
+                <input type="hidden" name="merchant_code" value={paymentConfig.merchant_code} />
                 <input type="hidden" name="pay_item_id" value={paymentConfig.pay_item_id} />
                 <input type="hidden" name="amount" value={paymentConfig.amount} />
                 <input type="hidden" name="currency" value={paymentConfig.currency} />
                 <input type="hidden" name="site_redirect_url" value={paymentConfig.site_redirect_url} />
                 <input type="hidden" name="txn_ref" value={paymentConfig.txn_ref} />
                 <input type="hidden" name="hash" value={paymentConfig.hash} />
+                <input type="hidden" name="cust_email" value={paymentConfig.cust_email} />
               </form>
             )}
             
