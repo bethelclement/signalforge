@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     description: 'AI-powered waste reporting and service payment platform.',
   },
   keywords: ['waste management', 'Lagos', 'AI', 'recycling', 'Interswitch'],
-  authors: [{ name: 'SignalForge' }],
+  authors: [{ name: 'Bethel' }, { name: 'Kuzan' }],
   icons: { icon: '/icon.svg' },
 };
 
@@ -100,7 +100,7 @@ export default function RootLayout({
              <div className="text-xs text-gray-400 flex flex-col md:flex-row gap-6 items-center font-medium">
                 <p>&copy; 2026 SIGNALFORGE. ALL RIGHTS RESERVED.</p>
                 <div className="hidden md:block w-1.5 h-1.5 bg-[var(--color-primary)]/30 rounded-full"></div>
-                <p className="uppercase tracking-widest">Lagos Commercial Waste Intelligence</p>
+                <p className="uppercase tracking-widest">Made with love by Bethel & Kuzan</p>
              </div>
           </div>
         </footer>
