@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, MapPin, Truck, Loader2 } from "lucide-react";
@@ -11,6 +11,9 @@ function SuccessContent() {
   const resp = searchParams.get("resp");
   const desc = searchParams.get("desc");
   const isSuccess = resp === '00' || !resp;
+  const [verifyStatus, setVerifyStatus] = useState<'pending' | 'verified' | 'failed' | 'skipped'>(
+    txnref.startsWith('WW-') ? 'pending' : 'skipped'
+  );
 
   useEffect(() => {
     if (resp === '00') {
@@ -31,7 +34,20 @@ function SuccessContent() {
         // Ignore localStorage errors
       }
     }
-  }, [resp, txnref, desc]);
+
+    // Server-side verification for real ISW transactions
+    if (txnref.startsWith('WW-')) {
+      const amount = searchParams.get('amount') || '';
+      fetch(`/api/verify-payment?txnref=${encodeURIComponent(txnref)}&amount=${encodeURIComponent(amount)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setVerifyStatus(data.success ? 'verified' : 'failed');
+        })
+        .catch(() => {
+          setVerifyStatus('failed');
+        });
+    }
+  }, [resp, txnref, desc, searchParams]);
 
   return (
     <div className="max-w-2xl mx-auto py-16 px-4 flex flex-col items-center text-center">
@@ -70,6 +86,28 @@ function SuccessContent() {
               </div>
             </div>
           </div>
+
+          {verifyStatus !== 'skipped' && (
+            <div className="mt-4 flex items-center gap-2">
+              {verifyStatus === 'pending' && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Verifying with ISW...
+                </span>
+              )}
+              {verifyStatus === 'verified' && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-800 border border-green-300">
+                  <CheckCircle className="w-3 h-3" />
+                  Server Verified
+                </span>
+              )}
+              {verifyStatus === 'failed' && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
+                  Verification Pending
+                </span>
+              )}
+            </div>
+          )}
 
           <div className="flex items-start gap-4 p-4 bg-green-50/50 rounded-xl border border-green-100 mt-4">
             <MapPin className="text-[var(--color-primary)] shrink-0 mt-0.5" size={20} />

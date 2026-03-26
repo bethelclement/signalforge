@@ -15,6 +15,9 @@ export default function ReportPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showErrors, setShowErrors] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoError, setGeoError] = useState<string | null>(null);
 
   // Create/revoke object URL for image preview
   useEffect(() => {
@@ -35,6 +38,23 @@ export default function ReportPage() {
     source?: string;
   } | null>(null);
 
+  // Persist analysis results (with coords) to localStorage
+  useEffect(() => {
+    if (analysisResult) {
+      try {
+        localStorage.setItem('signalforge_analysis', JSON.stringify({
+          ...analysisResult,
+          coords,
+          address,
+          reporterName,
+          reporterNumber,
+          details,
+          savedAt: new Date().toISOString()
+        }));
+      } catch {}
+    }
+  }, [analysisResult, coords]);
+
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentConfig, setPaymentConfig] = useState<any>(null);
 
@@ -45,6 +65,50 @@ export default function ReportPage() {
       setSelectedFile(e.target.files[0]);
       setShowErrors(false);
     }
+  };
+
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      setGeoError('Geolocation is not supported by your browser.');
+      return;
+    }
+    setGeoLoading(true);
+    setGeoError(null);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setCoords({ lat, lng });
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const data = await res.json();
+          if (data.display_name) {
+            setAddress(data.display_name);
+          }
+        } catch {
+          // Reverse geocoding failed silently; coords are still captured
+        } finally {
+          setGeoLoading(false);
+        }
+      },
+      (err) => {
+        setGeoLoading(false);
+        switch (err.code) {
+          case err.PERMISSION_DENIED:
+            setGeoError('Location permission denied.');
+            break;
+          case err.POSITION_UNAVAILABLE:
+            setGeoError('Location unavailable.');
+            break;
+          case err.TIMEOUT:
+            setGeoError('Location request timed out.');
+            break;
+          default:
+            setGeoError('Could not get location.');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   // Compress image to max 1024px / JPEG 82% quality before sending to Gemini
@@ -249,9 +313,20 @@ export default function ReportPage() {
                </div>
 
                <div>
-                  <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center gap-2">
-                    <MapPin size={16} className="text-[var(--color-primary)]"/> Exact Location (Address)
-                  </label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-semibold text-[var(--color-text-main)] flex items-center gap-2">
+                      <MapPin size={16} className="text-[var(--color-primary)]"/> Exact Location (Address)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleUseMyLocation}
+                      disabled={geoLoading}
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-primary)] border border-[var(--color-primary)]/30 bg-green-50 hover:bg-green-100 rounded-md px-2.5 py-1 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {geoLoading ? <Loader2 size={12} className="animate-spin" /> : <MapPin size={12} />}
+                      {geoLoading ? 'Locating...' : 'Use My Location'}
+                    </button>
+                  </div>
                   <input
                     type="text"
                     value={address}
@@ -261,6 +336,8 @@ export default function ReportPage() {
                     placeholder="e.g. 12 Obafemi Awolowo Way, Ikeja, Lagos"
                   />
                   {showErrors && !address && <p className="text-xs text-red-500 mt-1">Location address is required.</p>}
+                  {geoError && <p className="text-xs text-red-500 mt-1">{geoError}</p>}
+                  {coords && <span className="inline-block text-[10px] font-mono text-gray-500 bg-gray-100 rounded px-2 py-0.5 mt-1.5">GPS: {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}</span>}
                </div>
 
                <div>
@@ -368,6 +445,7 @@ export default function ReportPage() {
               <div className="md:col-span-2 pb-4 border-b border-gray-200">
                 <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1 flex items-center gap-1"><MapPin size={12}/> Target Location</p>
                 <p className="font-medium text-[var(--color-text-main)]">{address}</p>
+                {coords && <span className="inline-block text-[10px] font-mono text-gray-500 bg-gray-100 rounded px-2 py-0.5 mt-1">GPS: {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}</span>}
                 {details && <p className="text-sm text-gray-500 mt-1 italic">Note: {details}</p>}
               </div>
               <div>
