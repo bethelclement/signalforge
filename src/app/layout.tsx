@@ -30,12 +30,32 @@ export default function RootLayout({
             <nav className="hidden lg:flex items-center space-x-10">
               <a href="/dashboard" className="text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors uppercase tracking-widest">Telemetry</a>
               <a href="/#how-it-works" className="text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors uppercase tracking-widest">System</a>
-            </nav>
-            <div className="flex items-center gap-4">
               <a href="/report" className="btn-primary text-xs py-2.5 px-6 shadow-xl uppercase tracking-widest">
                 Deploy Report
               </a>
-            </div>
+            </nav>
+            {/* Mobile hamburger menu (CSS-only, no client JS needed) */}
+            <details className="lg:hidden relative group">
+              <summary className="list-none cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-secondary)] group-open:hidden">
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <line x1="3" y1="12" x2="21" y2="12" />
+                  <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-secondary)] hidden group-open:block">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </summary>
+              <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-[var(--color-border)] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <a href="/dashboard" className="block px-5 py-3 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-gray-50 transition-colors uppercase tracking-widest">Telemetry</a>
+                <a href="/#how-it-works" className="block px-5 py-3 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-gray-50 transition-colors uppercase tracking-widest">System</a>
+                <div className="mx-4 my-2 h-px bg-gray-100"></div>
+                <a href="/report" className="block mx-4 my-2 btn-primary text-xs py-2.5 px-6 shadow-xl uppercase tracking-widest text-center">
+                  Deploy Report
+                </a>
+              </div>
+            </details>
           </div>
         </header>
 

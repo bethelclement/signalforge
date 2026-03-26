@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, BarChart3, Camera, ShieldCheck, Zap, MapPin } from "lucide-react";
+import StatusBar from "./components/StatusBar";
 
 export default function Home() {
   return (
@@ -7,22 +8,7 @@ export default function Home() {
       <div className="absolute inset-0 bg-grid-pattern -z-10 h-[800px] w-full [mask-image:linear-gradient(to_bottom,white,transparent)] pointer-events-none"></div>
       
       {/* System Health Status - Judge Impact */}
-      <div className="flex items-center justify-center gap-6 px-4 py-2 bg-gray-900 text-white rounded-full mx-auto text-[10px] font-bold uppercase tracking-[0.2em] shadow-2xl z-20 sticky top-24 animate-in fade-in slide-in-from-top-4 duration-1000">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-          <span>Gemini 1.5 Flash : Operational</span>
-        </div>
-        <div className="w-px h-3 bg-white/20"></div>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-          <span>ISW Webpay @ QA : Verified</span>
-        </div>
-        <div className="w-px h-3 bg-white/20"></div>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
-          <span>Lagos Node : Synchronized</span>
-        </div>
-      </div>
+      <StatusBar />
 
       {/* Hero Section */}
       <section className="pt-8 text-center md:text-left flex flex-col md:flex-row items-center gap-12">

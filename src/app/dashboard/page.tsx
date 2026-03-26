@@ -1,32 +1,85 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  BarChart3, 
-  Activity, 
-  ShieldCheck, 
-  MapPin, 
-  Search, 
-  Bell, 
-  ArrowUpRight, 
-  Camera, 
+import {
+  BarChart3,
+  Activity,
+  ShieldCheck,
+  MapPin,
+  Search,
+  Bell,
+  ArrowUpRight,
+  Camera,
   Database,
   ArrowRight,
   TrendingUp,
   Cpu
 } from "lucide-react";
 
+interface StoredReport {
+  id: string;
+  timestamp: string;
+  resp: string;
+  desc: string;
+}
+
+interface Transaction {
+  id: string;
+  type: string;
+  location: string;
+  amount: number;
+  time: string;
+  status: string;
+  mlConfidence: number;
+}
+
+function timeAgo(timestamp: string): string {
+  const diff = Date.now() - new Date(timestamp).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} min${mins > 1 ? "s" : ""} ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days > 1 ? "s" : ""} ago`;
+}
+
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
-  const recentTransactions = [
+  const mockTransactions: Transaction[] = [
     { id: "WW-VERIFIED-89102", type: "Commercial Plastics", location: "Oshodi Market", amount: 4500, time: "2 mins ago", status: "Paid", mlConfidence: 98.4 },
     { id: "WW-VERIFIED-77192", type: "Mixed Recyclables", location: "Lekki Phase 1", amount: 2500, time: "14 mins ago", status: "Paid", mlConfidence: 85.1 },
     { id: "WW-VERIFIED-63811", type: "Scrap Metal / E-Waste", location: "Computer Village", amount: 12500, time: "1 hour ago", status: "Paid", mlConfidence: 99.2 },
     { id: "WW-VERIFIED-55290", type: "Cardboard & Paper", location: "Yaba Hub", amount: 1800, time: "3 hours ago", status: "Pending", mlConfidence: 91.0 },
     { id: "WW-VERIFIED-44102", type: "Biodegradable Organic", location: "Agege", amount: 3200, time: "5 hours ago", status: "Paid", mlConfidence: 88.5 },
   ];
+
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>(mockTransactions);
+  const [totalReports, setTotalReports] = useState(8409);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("wastewise_reports");
+      if (stored) {
+        const reports: StoredReport[] = JSON.parse(stored);
+        const realTransactions: Transaction[] = reports.map((r) => ({
+          id: r.id,
+          type: r.desc || "Verified Payment",
+          location: "Lagos",
+          amount: 0,
+          time: timeAgo(r.timestamp),
+          status: r.resp === "00" ? "Paid" : "Pending",
+          mlConfidence: 0,
+        }));
+        setRecentTransactions([...realTransactions, ...mockTransactions]);
+        setTotalReports(8409 + reports.length);
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50/50">
@@ -110,7 +163,7 @@ export default function Dashboard() {
               </span>
             </div>
             <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">AI Extractions</p>
-            <h3 className="text-4xl font-black tracking-tighter text-[var(--color-text-main)] mt-1">8,409</h3>
+            <h3 className="text-4xl font-black tracking-tighter text-[var(--color-text-main)] mt-1">{totalReports.toLocaleString()}</h3>
           </div>
 
           <div className="card p-6 border-l-4 border-l-amber-500">

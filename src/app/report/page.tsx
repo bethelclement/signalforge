@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { UploadCloud, CheckCircle2, Calculator, ChevronRight, Loader2, ShieldCheck, MapPin, AlignLeft } from 'lucide-react';
 
 export default function ReportPage() {
@@ -13,7 +13,20 @@ export default function ReportPage() {
   const [address, setAddress] = useState('');
   const [details, setDetails] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showErrors, setShowErrors] = useState(false);
+
+  // Create/revoke object URL for image preview
+  useEffect(() => {
+    if (selectedFile) {
+      const url = URL.createObjectURL(selectedFile);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [selectedFile]);
+
   const [analysisResult, setAnalysisResult] = useState<{
     category: string;
     volume: string;
@@ -30,6 +43,7 @@ export default function ReportPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setSelectedFile(e.target.files[0]);
+      setShowErrors(false);
     }
   };
 
@@ -61,7 +75,10 @@ export default function ReportPage() {
   };
 
   const handleAnalyzeUpload = () => {
-    if (!selectedFile || !address || !reporterName || !reporterNumber) return;
+    if (!selectedFile || !address || !reporterName || !reporterNumber) {
+      setShowErrors(true);
+      return;
+    }
     
     // 1. First trigger Interswitch Identity Verification (KYC) API simulation
     setIsVerifyingKYC(true);
@@ -205,27 +222,29 @@ export default function ReportPage() {
                     <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center gap-2">
                       Reporter's Full Name
                     </label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={reporterName}
-                      onChange={(e) => setReporterName(e.target.value)}
-                      required 
-                      className="input-field w-full bg-gray-50 focus:bg-white transition-colors" 
+                      onChange={(e) => { setReporterName(e.target.value); setShowErrors(false); }}
+                      required
+                      className={`input-field w-full bg-gray-50 focus:bg-white transition-colors ${showErrors && !reporterName ? 'border-red-400 bg-red-50' : ''}`}
                       placeholder="e.g. Yakubu Olamide"
                     />
+                    {showErrors && !reporterName && <p className="text-xs text-red-500 mt-1">Full name is required.</p>}
                  </div>
                  <div>
                     <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center gap-2">
                       Reporter's Phone Number
                     </label>
-                    <input 
-                      type="tel" 
+                    <input
+                      type="tel"
                       value={reporterNumber}
-                      onChange={(e) => setReporterNumber(e.target.value)}
-                      required 
-                      className="input-field w-full bg-gray-50 focus:bg-white transition-colors" 
+                      onChange={(e) => { setReporterNumber(e.target.value); setShowErrors(false); }}
+                      required
+                      className={`input-field w-full bg-gray-50 focus:bg-white transition-colors ${showErrors && !reporterNumber ? 'border-red-400 bg-red-50' : ''}`}
                       placeholder="e.g. 08012345678"
                     />
+                    {showErrors && !reporterNumber && <p className="text-xs text-red-500 mt-1">Phone number is required.</p>}
                  </div>
                </div>
 
@@ -233,14 +252,15 @@ export default function ReportPage() {
                   <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center gap-2">
                     <MapPin size={16} className="text-[var(--color-primary)]"/> Exact Location (Address)
                   </label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    required 
-                    className="input-field w-full bg-gray-50 focus:bg-white transition-colors" 
+                    onChange={(e) => { setAddress(e.target.value); setShowErrors(false); }}
+                    required
+                    className={`input-field w-full bg-gray-50 focus:bg-white transition-colors ${showErrors && !address ? 'border-red-400 bg-red-50' : ''}`}
                     placeholder="e.g. 12 Obafemi Awolowo Way, Ikeja, Lagos"
                   />
+                  {showErrors && !address && <p className="text-xs text-red-500 mt-1">Location address is required.</p>}
                </div>
 
                <div>
@@ -280,9 +300,9 @@ export default function ReportPage() {
                         <p className="font-bold tracking-tight">Extracting spatial telemetry...</p>
                         <p className="text-[10px] text-[var(--color-text-muted)] animate-pulse uppercase tracking-[0.2em]">Matrix alignment in progress</p>
                       </div>
-                    ) : selectedFile ? (
+                    ) : selectedFile && previewUrl ? (
                       <div className="flex flex-col items-center gap-2">
-                        <CheckCircle2 className="w-12 h-12 text-green-500 mb-2" />
+                        <img src={previewUrl} alt="Preview" className="max-h-[200px] w-auto object-contain rounded-lg border border-green-200 shadow-sm mb-2" />
                         <h3 className="font-bold text-green-800">{selectedFile.name}</h3>
                         <p className="text-xs text-green-600">Image attached securely. Click to change.</p>
                       </div>
@@ -298,13 +318,14 @@ export default function ReportPage() {
                       </>
                     )}
                   </div>
+                  {showErrors && !selectedFile && <p className="text-xs text-red-500 mt-2">Please upload a photo of the waste.</p>}
                </div>
              </div>
 
              <div className="mt-8 pt-6 border-t border-[var(--color-border)] flex justify-end">
                <button 
                   onClick={handleAnalyzeUpload}
-                   disabled={!address || !selectedFile || !reporterName || !reporterNumber || isAnalyzing || isVerifyingKYC}
+                   disabled={isAnalyzing || isVerifyingKYC}
                   className="btn-primary flex items-center gap-2 px-8 py-3 shadow-md disabled:bg-emerald-300 disabled:cursor-not-allowed transition-all"
                >
                  {isVerifyingKYC ? (
