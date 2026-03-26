@@ -73,7 +73,15 @@ function SuccessContent() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">ISW Reference</p>
-              <p className="font-mono text-xs mt-1 bg-gray-50 p-2 rounded border border-gray-200">{txnref}</p>
+              <div className="flex justify-between items-center py-4 border-b border-gray-100 group">
+                <span className="text-sm font-medium text-gray-500">PSP Dispatch Ref</span>
+                <span className="text-sm font-mono font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100">LAWMA-Z4-A2B9X</span>
+              </div>
+
+              <div className="flex justify-between items-center py-4 border-b border-gray-100">
+                <span className="text-sm font-medium text-gray-500">Transaction Ref</span>
+                <span className="font-mono text-xs font-bold bg-gray-50 p-2 rounded border border-gray-200">{txnref}</span>
+              </div>
             </div>
             <div className="text-right">
               <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">ISW Response</p>
