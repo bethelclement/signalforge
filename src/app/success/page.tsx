@@ -1,14 +1,53 @@
-import Link from "next/link";
-import { CheckCircle, MapPin, Truck } from "lucide-react";
+"use client";
 
-export default async function SuccessPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ txnref?: string; resp?: string; desc?: string; txnRef?: string }>;
-}) {
-  const params = await searchParams;
-  const txnref = params.txnref || params.txnRef || 'WW-VERIFIED-782103';
-  const isSuccess = params.resp === '00' || !params.resp; // 00 is ISW success
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { CheckCircle, MapPin, Truck, Loader2 } from "lucide-react";
+
+function SuccessContent() {
+  const searchParams = useSearchParams();
+  const txnref = searchParams.get("txnref") || searchParams.get("txnRef") || 'WW-VERIFIED-782103';
+  const resp = searchParams.get("resp");
+  const desc = searchParams.get("desc");
+  const isSuccess = resp === '00' || !resp;
+  const [verifyStatus, setVerifyStatus] = useState<'pending' | 'verified' | 'failed' | 'skipped'>(
+    txnref.startsWith('WW-') ? 'pending' : 'skipped'
+  );
+
+  useEffect(() => {
+    if (resp === '00') {
+      try {
+        const stored = localStorage.getItem("wastewise_reports");
+        const reports: Array<{ id: string; timestamp: string; resp: string; desc: string }> = stored ? JSON.parse(stored) : [];
+        reports.unshift({
+          id: txnref,
+          timestamp: new Date().toISOString(),
+          resp: resp,
+          desc: desc || "Approved by Financial Institution",
+        });
+        if (reports.length > 50) {
+          reports.length = 50;
+        }
+        localStorage.setItem("wastewise_reports", JSON.stringify(reports));
+      } catch {
+        // Ignore localStorage errors
+      }
+    }
+
+    // Server-side verification for real ISW transactions
+    if (txnref.startsWith('WW-')) {
+      const amount = searchParams.get('amount') || '';
+      fetch(`/api/verify-payment?txnref=${encodeURIComponent(txnref)}&amount=${encodeURIComponent(amount)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setVerifyStatus(data.success ? 'verified' : 'failed');
+        })
+        .catch(() => {
+          setVerifyStatus('failed');
+        });
+    }
+  }, [resp, txnref, desc, searchParams]);
 
   return (
     <div className="max-w-2xl mx-auto py-16 px-4 flex flex-col items-center text-center">
@@ -20,8 +59,8 @@ export default async function SuccessPage({
         {isSuccess ? 'Payment Successful' : 'Payment Awaiting Final Confirmation'}
       </h1>
       <p className="text-[var(--color-text-muted)] text-lg mb-8 max-w-lg">
-        {isSuccess 
-          ? 'Your waste clearance payment has been verified via Interswitch. Your request is now active.' 
+        {isSuccess
+          ? 'Your waste clearance payment has been verified via Interswitch. Your request is now active.'
           : 'Your payment was processed. We are awaiting final synchronization with the Interswitch node.'}
       </p>
 
@@ -29,7 +68,7 @@ export default async function SuccessPage({
         <h3 className="font-bold text-lg border-b border-[var(--color-border)] pb-4 mb-4 flex items-center gap-2">
           <Truck className="w-5 h-5 text-[var(--color-text-muted)]" /> Dispatch & Transaction Telemetry
         </h3>
-        
+
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -50,11 +89,33 @@ export default async function SuccessPage({
                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tighter ${
                   isSuccess ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
                 }`}>
-                  {params.resp || '00'} : {params.desc || 'Approved by Financial Institution'}
+                  {resp || '00'} : {desc || 'Approved by Financial Institution'}
                 </span>
               </div>
             </div>
           </div>
+
+          {verifyStatus !== 'skipped' && (
+            <div className="mt-4 flex items-center gap-2">
+              {verifyStatus === 'pending' && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Verifying with ISW...
+                </span>
+              )}
+              {verifyStatus === 'verified' && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-800 border border-green-300">
+                  <CheckCircle className="w-3 h-3" />
+                  Server Verified
+                </span>
+              )}
+              {verifyStatus === 'failed' && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
+                  Verification Pending
+                </span>
+              )}
+            </div>
+          )}
 
           <div className="flex items-start gap-4 p-4 bg-green-50/50 rounded-xl border border-green-100 mt-4">
             <MapPin className="text-[var(--color-primary)] shrink-0 mt-0.5" size={20} />
@@ -75,5 +136,18 @@ export default async function SuccessPage({
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-2xl mx-auto py-16 px-4 flex flex-col items-center text-center">
+        <Loader2 className="w-12 h-12 animate-spin text-[var(--color-primary)] mb-4" />
+        <p className="text-[var(--color-text-muted)]">Loading transaction details...</p>
+      </div>
+    }>
+      <SuccessContent />
+    </Suspense>
   );
 }

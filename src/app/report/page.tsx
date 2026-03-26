@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { UploadCloud, CheckCircle2, Calculator, ChevronRight, Loader2, ShieldCheck, MapPin, AlignLeft } from 'lucide-react';
 
 export default function ReportPage() {
@@ -13,7 +13,23 @@ export default function ReportPage() {
   const [address, setAddress] = useState('');
   const [details, setDetails] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showErrors, setShowErrors] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoError, setGeoError] = useState<string | null>(null);
+
+  // Create/revoke object URL for image preview
+  useEffect(() => {
+    if (selectedFile) {
+      const url = URL.createObjectURL(selectedFile);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [selectedFile]);
+
   const [analysisResult, setAnalysisResult] = useState<{
     category: string;
     volume: string;
@@ -21,6 +37,23 @@ export default function ReportPage() {
     description: string;
     source?: string;
   } | null>(null);
+
+  // Persist analysis results (with coords) to localStorage
+  useEffect(() => {
+    if (analysisResult) {
+      try {
+        localStorage.setItem('signalforge_analysis', JSON.stringify({
+          ...analysisResult,
+          coords,
+          address,
+          reporterName,
+          reporterNumber,
+          details,
+          savedAt: new Date().toISOString()
+        }));
+      } catch {}
+    }
+  }, [analysisResult, coords]);
 
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentConfig, setPaymentConfig] = useState<any>(null);
@@ -30,7 +63,52 @@ export default function ReportPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setSelectedFile(e.target.files[0]);
+      setShowErrors(false);
     }
+  };
+
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      setGeoError('Geolocation is not supported by your browser.');
+      return;
+    }
+    setGeoLoading(true);
+    setGeoError(null);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setCoords({ lat, lng });
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const data = await res.json();
+          if (data.display_name) {
+            setAddress(data.display_name);
+          }
+        } catch {
+          // Reverse geocoding failed silently; coords are still captured
+        } finally {
+          setGeoLoading(false);
+        }
+      },
+      (err) => {
+        setGeoLoading(false);
+        switch (err.code) {
+          case err.PERMISSION_DENIED:
+            setGeoError('Location permission denied.');
+            break;
+          case err.POSITION_UNAVAILABLE:
+            setGeoError('Location unavailable.');
+            break;
+          case err.TIMEOUT:
+            setGeoError('Location request timed out.');
+            break;
+          default:
+            setGeoError('Could not get location.');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   // Compress image to max 1024px / JPEG 82% quality before sending to Gemini
@@ -61,7 +139,10 @@ export default function ReportPage() {
   };
 
   const handleAnalyzeUpload = () => {
-    if (!selectedFile || !address || !reporterName || !reporterNumber) return;
+    if (!selectedFile || !address || !reporterName || !reporterNumber) {
+      setShowErrors(true);
+      return;
+    }
     
     // 1. First trigger Interswitch Identity Verification (KYC) API simulation
     setIsVerifyingKYC(true);
@@ -125,7 +206,10 @@ export default function ReportPage() {
       const res = await fetch('/api/pay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: (analysisResult?.estimatedCost || 2500) * 100 })
+        body: JSON.stringify({
+          amount: (analysisResult?.estimatedCost || 2500) * 100,
+          email: (document.querySelector('input[name="email"]') as HTMLInputElement)?.value || 'user@signalforge.io'
+        })
       });
       
       const config = await res.json();
@@ -136,13 +220,14 @@ export default function ReportPage() {
       form.action = config.action_url;
       
       const fields = {
-        product_id: config.product_id,
+        merchant_code: config.merchant_code,
         pay_item_id: config.pay_item_id,
         amount: config.amount,
         currency: config.currency,
         site_redirect_url: config.site_redirect_url,
         txn_ref: config.txn_ref,
-        hash: config.hash
+        hash: config.hash,
+        cust_email: config.cust_email
       };
 
       Object.entries(fields).forEach(([key, value]) => {
@@ -192,7 +277,7 @@ export default function ReportPage() {
           <div className="card p-5 sm:p-8 bg-white border border-[var(--color-border)] shadow-sm">
              <h2 className="text-xl font-bold mb-6 text-[var(--color-text-main)] border-b pb-4 flex flex-col sm:flex-row sm:items-center gap-3">
                 Incident Details
-                <span className="text-[10px] uppercase font-bold tracking-widest bg-blue-50 text-blue-700 w-fit px-2 py-1 rounded border border-blue-200">Interswitch ID Verified</span>
+                <span className="text-[10px] uppercase font-bold tracking-widest bg-blue-50 text-blue-700 w-fit px-2 py-1 rounded border border-blue-200">Protected by ISW KYC</span>
              </h2>
              
              <div className="space-y-6">
@@ -201,42 +286,58 @@ export default function ReportPage() {
                     <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center gap-2">
                       Reporter's Full Name
                     </label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={reporterName}
-                      onChange={(e) => setReporterName(e.target.value)}
-                      required 
-                      className="input-field w-full bg-gray-50 focus:bg-white transition-colors" 
+                      onChange={(e) => { setReporterName(e.target.value); setShowErrors(false); }}
+                      required
+                      className={`input-field w-full bg-gray-50 focus:bg-white transition-colors ${showErrors && !reporterName ? 'border-red-400 bg-red-50' : ''}`}
                       placeholder="e.g. Yakubu Olamide"
                     />
+                    {showErrors && !reporterName && <p className="text-xs text-red-500 mt-1">Full name is required.</p>}
                  </div>
                  <div>
                     <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center gap-2">
                       Reporter's Phone Number
                     </label>
-                    <input 
-                      type="tel" 
+                    <input
+                      type="tel"
                       value={reporterNumber}
-                      onChange={(e) => setReporterNumber(e.target.value)}
-                      required 
-                      className="input-field w-full bg-gray-50 focus:bg-white transition-colors" 
+                      onChange={(e) => { setReporterNumber(e.target.value); setShowErrors(false); }}
+                      required
+                      className={`input-field w-full bg-gray-50 focus:bg-white transition-colors ${showErrors && !reporterNumber ? 'border-red-400 bg-red-50' : ''}`}
                       placeholder="e.g. 08012345678"
                     />
+                    {showErrors && !reporterNumber && <p className="text-xs text-red-500 mt-1">Phone number is required.</p>}
                  </div>
                </div>
 
                <div>
-                  <label className="block text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center gap-2">
-                    <MapPin size={16} className="text-[var(--color-primary)]"/> Exact Location (Address)
-                  </label>
-                  <input 
-                    type="text" 
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-semibold text-[var(--color-text-main)] flex items-center gap-2">
+                      <MapPin size={16} className="text-[var(--color-primary)]"/> Exact Location (Address)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleUseMyLocation}
+                      disabled={geoLoading}
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-primary)] border border-[var(--color-primary)]/30 bg-green-50 hover:bg-green-100 rounded-md px-2.5 py-1 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {geoLoading ? <Loader2 size={12} className="animate-spin" /> : <MapPin size={12} />}
+                      {geoLoading ? 'Locating...' : 'Use My Location'}
+                    </button>
+                  </div>
+                  <input
+                    type="text"
                     value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    required 
-                    className="input-field w-full bg-gray-50 focus:bg-white transition-colors" 
+                    onChange={(e) => { setAddress(e.target.value); setShowErrors(false); }}
+                    required
+                    className={`input-field w-full bg-gray-50 focus:bg-white transition-colors ${showErrors && !address ? 'border-red-400 bg-red-50' : ''}`}
                     placeholder="e.g. 12 Obafemi Awolowo Way, Ikeja, Lagos"
                   />
+                  {showErrors && !address && <p className="text-xs text-red-500 mt-1">Location address is required.</p>}
+                  {geoError && <p className="text-xs text-red-500 mt-1">{geoError}</p>}
+                  {coords && <span className="inline-block text-[10px] font-mono text-gray-500 bg-gray-100 rounded px-2 py-0.5 mt-1.5">GPS: {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}</span>}
                </div>
 
                <div>
@@ -276,9 +377,9 @@ export default function ReportPage() {
                         <p className="font-bold tracking-tight">Extracting spatial telemetry...</p>
                         <p className="text-[10px] text-[var(--color-text-muted)] animate-pulse uppercase tracking-[0.2em]">Matrix alignment in progress</p>
                       </div>
-                    ) : selectedFile ? (
+                    ) : selectedFile && previewUrl ? (
                       <div className="flex flex-col items-center gap-2">
-                        <CheckCircle2 className="w-12 h-12 text-green-500 mb-2" />
+                        <img src={previewUrl} alt="Preview" className="max-h-[200px] w-auto object-contain rounded-lg border border-green-200 shadow-sm mb-2" />
                         <h3 className="font-bold text-green-800">{selectedFile.name}</h3>
                         <p className="text-xs text-green-600">Image attached securely. Click to change.</p>
                       </div>
@@ -294,13 +395,14 @@ export default function ReportPage() {
                       </>
                     )}
                   </div>
+                  {showErrors && !selectedFile && <p className="text-xs text-red-500 mt-2">Please upload a photo of the waste.</p>}
                </div>
              </div>
 
              <div className="mt-8 pt-6 border-t border-[var(--color-border)] flex justify-end">
                <button 
                   onClick={handleAnalyzeUpload}
-                   disabled={!address || !selectedFile || !reporterName || !reporterNumber || isAnalyzing || isVerifyingKYC}
+                   disabled={isAnalyzing || isVerifyingKYC}
                   className="btn-primary flex items-center gap-2 px-8 py-3 shadow-md disabled:bg-emerald-300 disabled:cursor-not-allowed transition-all"
                >
                  {isVerifyingKYC ? (
@@ -343,6 +445,7 @@ export default function ReportPage() {
               <div className="md:col-span-2 pb-4 border-b border-gray-200">
                 <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1 flex items-center gap-1"><MapPin size={12}/> Target Location</p>
                 <p className="font-medium text-[var(--color-text-main)]">{address}</p>
+                {coords && <span className="inline-block text-[10px] font-mono text-gray-500 bg-gray-100 rounded px-2 py-0.5 mt-1">GPS: {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}</span>}
                 {details && <p className="text-sm text-gray-500 mt-1 italic">Note: {details}</p>}
               </div>
               <div>
@@ -430,13 +533,14 @@ export default function ReportPage() {
             {/* Hidden Interswitch Checkout Form */}
             {paymentConfig && (
               <form id="interswitch-checkout-form" action={paymentConfig.action_url} method="POST" style={{ display: 'none' }}>
-                <input type="hidden" name="product_id" value={paymentConfig.product_id} />
+                <input type="hidden" name="merchant_code" value={paymentConfig.merchant_code} />
                 <input type="hidden" name="pay_item_id" value={paymentConfig.pay_item_id} />
                 <input type="hidden" name="amount" value={paymentConfig.amount} />
                 <input type="hidden" name="currency" value={paymentConfig.currency} />
                 <input type="hidden" name="site_redirect_url" value={paymentConfig.site_redirect_url} />
                 <input type="hidden" name="txn_ref" value={paymentConfig.txn_ref} />
                 <input type="hidden" name="hash" value={paymentConfig.hash} />
+                <input type="hidden" name="cust_email" value={paymentConfig.cust_email} />
               </form>
             )}
             

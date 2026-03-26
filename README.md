@@ -67,39 +67,7 @@ python wastewise-ai-pro.py --image path/to/waste.jpg
 
 ---
 
----
-
-## 🧪 Testing & Credentials
-
-To verify the **Interswitch Webpay** integration, judges can use the following test card on the QA gateway:
-
-| Field | Value |
-|---|---|
-| **Card Number** | `53998310000000001` |
-| **Expiry Date** | `12/26` |
-| **CVV** | `111` |
-| **PIN** | `1234` |
-| **OTP** | `123456` (If prompted) |
-
-> [!NOTE]
-> All AI analysis features are "Always-On" via our **Neural Deterministic Matrix**, ensuring a successful demo even if external API limits are reached.
-
----
-
-## 👥 Team & Contributions
-
-This project was built by a multi-disciplinary team for the Enyata x Interswitch Build-a-thon.
-
-- **Clement Bethel Chinedu** (Team Lead)
-  - **Technical**: Lead Full-Stack Development, Interswitch IPG Integration (Webpay), Gemini AI Prompt Engineering, and Deterministic Failover Logic.
-  - **Non-Technical**: Product Vision, Systems Architecture Design, and Project Documentation.
-- **Elvis Eze** (AI/ML Engineer)
-  - **Technical**: UI/UX Implementation, Tailwind CSS Styling, and Safari Browser Optimization.
-  - **Non-Technical**: User Research (Lagos Waste Hotspots) and Quality Assurance Testing.
-
----
-
 ## 📍 Purpose & Impact
 WasteWise AI solves the "Classification Gap" in Nigerian waste management. By automating the identification of salvageable materials in Lagos commercial zones, we reduce clearance overhead and accelerate the routing of recyclables to certified PSP collection nodes.
 
-**Built for the Enyata x Interswitch Build-a-thon 2026.**
+**Built for the 3MTT Knowledge Showcase.**
